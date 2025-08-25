@@ -1,5 +1,5 @@
 # Obsidian MarkdownToFoundry Plugin
-Adjusts and exports the natively as HTML rendered Markdown from Obsidian to Foundry VTT.
+Adjusts and exports the natively as HTML rendered Markdown from Obsidian to Foundry VTT.   
 An  [Obsidian](https://obsidian.md) plugin to copy notes as HTML to the clipboard, export as file and/or upload as journal to Foundry VTT.
 
 ## Foreword
@@ -458,7 +458,7 @@ after each import.
 ### Set Foundry standard export settings
 - **Description**: Allows to set standard export settings for Foundry export
 - Default: Disabled
-- 
+
 ### Foundry Folder
 - **Description**: Set the default Foundry VTT export folder.
 - **Input**: Enter the folder name.
