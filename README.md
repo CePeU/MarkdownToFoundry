@@ -22,7 +22,7 @@ an undo ist implemented, font handling is a mess, html sanitizing seems to have 
 - better/easier backup
 - better search and organization of notes
 
-## Foreword
+# Foreword
 
 A long time ago now it seems I read the following line:
 
