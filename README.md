@@ -2,6 +2,26 @@
 Adjusts and exports the natively as HTML rendered Markdown from Obsidian to Foundry VTT.   
 An  [Obsidian](https://obsidian.md) plugin to copy notes as HTML to the clipboard, export as file and/or upload as journal to Foundry VTT.
 
+## Why Obsidian and not directly in Foundry
+
+This is a purely personal view and while I love Foundry as a VTT it sucks at preparation:
+
+### Foundry Cons
+- The devs only improve marginally on Foundry journals. Journals are only a second or third thought in their considerations. (even their own
+content creators are affected by this if I am informed correctly)  
+- The editor sucks even though it could be made better with just a bit of effort (not even
+an undo ist implemented, font handling is a mess, html sanitizing seems to have been rolled up in a wild magic zone, etc.).
+- Campaign management sucks (and if I get a tip or two I will try Ripper's module which seems quite nice)
+- It is a VTT (more or less)
+
+### Obsidian pros
+- Better editor (with plugins, undo, formatting etc.)
+- Dataview plugin and now Base!
+- Second window during gameplay (one for Foundry one for Obsidian = more Screen size)
+- note centric + a lot of plugins for that
+- better/easier backup
+- better search and organization of notes
+
 ## Foreword
 
 A long time ago now it seems I read the following line:
@@ -9,7 +29,8 @@ A long time ago now it seems I read the following line:
 _"Stories grow from stories told"_
 
 The same can be said about software. I am a long time pen and paper player and even before the online VTT hype coming with corona which
-brought dozens of VTT software to the market I was allready playing online by skype (for 10 years) with my long time 20 year old group.
+brought dozens of VTT software to the market I was allready playing online by skype (for 10 years) with my long time 20 year old group 
+(so yes I am probably an old grandpa).
 I discovered Foundry VTT and it hooked me at once with it's ability to expand it with plugins, one time payment and self hosting.
 Lately they do not give so much concern to some basic functionality I deem essentialy in a VTT - which are journals. They changed
 the editor to Prose Mirror and it is still not able to import HTML in the same way as the old editor did and does. 
