@@ -9,8 +9,8 @@ This is a purely personal view and while I love Foundry as a VTT it sucks at pre
 ### Foundry Cons
 - The devs only improve marginally on Foundry journals. Journals are only a second or third thought in their considerations. (even their own
 content creators are affected by this if I am informed correctly)  
-- The editor sucks even though it could be made better with just a bit of effort (not even
-an undo ist implemented, font handling is a mess, html sanitizing seems to have been rolled up in a wild magic zone, etc.).
+- The editor sucks even though it could be made better with just a bit of effort (undo ist implemented only as keybinding so not easily found by new users,
+  font handling is a mess, html sanitizing seems to have been rolled up in a wild magic zone, etc.).
 - Campaign management sucks (and if I get a tip or two I will try Ripper's module which seems quite nice)
 - It is a VTT (more or less)
 
