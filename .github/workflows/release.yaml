@@ -1,0 +1,48 @@
+name: Release Obsidian plugin
+
+on:
+  push:
+    tags:
+      - "*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to use for release'
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.x"
+
+      - name: Build plugin
+        run: |
+          npm install
+          npm run build
+
+      - name: Zip output
+        run: |
+          mkdir markdowntofoundry
+          cp main.js manifest.json styles.css ./src/data.json ./markdowntofoundry/
+          zip -r markdowntofoundry.zip markdowntofoundry
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Handle both trigger types, github.event.inputs.tag is for getting the tag manual. If not found the automatic tag retrieval is used.
+          # input events are only available for manual events aka workflow_dispatch events.
+          tag="${{ github.event.inputs.tag || github.ref_name }}"
+          
+          gh release create "$tag" \
+            --title="Release $tag" \
+            --draft \
+            main.js manifest.json styles.css ./src/data.json markdowntofoundry.zip
