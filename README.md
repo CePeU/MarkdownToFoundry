@@ -377,8 +377,8 @@ the one which ThreeHats supplies (currently free of charge but bandwith costs mo
 - **Input**: Enter the API key.
 
 You need an API key for the relay server. The API key is like your password so the Foundry instance
-authorizes agains the relay server and this plugin does so also. You can set and get the API key
-from the Foundry VTT REST module!
+authorizes agains the relay server and this plugin does so also. You get the API key
+from the Foundry VTT RELAY once you made an account. Then you need to input that API key into your Foundry module AND the Obsidian Plugin!   
 
 ### Relay Server
 - **Description**: IP or URL of the relay server for Foundry VTT.
