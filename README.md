@@ -292,7 +292,8 @@ For Foundry export a function to generate a foundry compliant ID (api.createID) 
 function with "return 'variable holding the html string' " to return the modified HTML.
 
 #### Example:   
-(which will replcace all exported classes="secret" which are my callouts for GM stuff with the "secret" class of Foundry and give it an id)   
+(which will replcace all exported classes="secret" which are my callouts for GM stuff with the "secret" class of Foundry and give it an id)
+
 const newHtml = html.replace(/class="secret"/g, function(match) {   
   const newId = api.createID();   
   return `class="secret" id="secret-${newId}"`;   
