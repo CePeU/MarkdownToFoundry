@@ -311,6 +311,7 @@ return newHtml
   - Add or edit header and footer content.
 
 You can add any text you like as header and footer to the output html text. Make sure it makes sense!
+(For Foundry you thus can wrap the whole export in a div with a special class and bind css to that)    
 
 ### Wikilink Resolution
 - **Description**: Resolve internal Obsidian wikilinks and export them with the Obsidian vault path.
