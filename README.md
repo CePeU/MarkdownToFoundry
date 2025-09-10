@@ -280,7 +280,7 @@ is set. The plugin uses query selector syntax.
 - **Description**: Add regex rules to modify the HTML during export.
 - **Example**: Use regex to replace specific patterns in the HTML.
 
-You can specify what regex rules are applied and in which order. 
+You can specify what regex rules are applied and in which order.   
 (TODO: Add examples)
 
 ### Javascript Replacements
@@ -291,12 +291,13 @@ You can write Javascript code to manipulate the HTML. The HTML is supplied as a 
 For Foundry export a function to generate a foundry compliant ID (api.createID) is also exposed. You need to end your
 function with "return 'variable holding the html string' " to return the modified HTML.
 
-#### Example:
-const newHtml = html.replace(/class="secret"/g, function(match) {
-  const newId = api.createID(); 
-  return `class="secret" id="secret-${newId}"`;
-});
-return newHtml
+#### Example:   
+(which will replcace all exported classes="secret" which are my callouts for GM stuff with the "secret" class of Foundry and give it an id)   
+const newHtml = html.replace(/class="secret"/g, function(match) {   
+  const newId = api.createID();   
+  return `class="secret" id="secret-${newId}"`;   
+});   
+return newHtml   
 
 
 ---
