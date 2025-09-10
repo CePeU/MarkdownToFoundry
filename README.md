@@ -163,13 +163,13 @@ Up to this point a HTML node view was manipulated! After these steps an HTML str
 >[!IMPORTANT]
 >You need to install configure three things for full Foundry VTT functionality! 
 
- A)  You need to install this plugin in Obsidian. This will give you HTML export and the ability to potentially push the HTML to Foundry VTT
+ A)  You need to install this plugin in Obsidian. This will give you HTML export and the ability to potentially push the HTML to Foundry VTT   
  B)  You need to install a relay server or make an account with an open relay server which will be the communication hub between the 
      MarkdownToFoundry Obsidian plugin and the REST Foundry module. Installing the relay server locally will allow you to use an unlimited amount
-     of rest calls.
-     [ThreeHats/foundryvtt-rest-api-relay](https://github.com/ThreeHats/foundryvtt-rest-api-relay) or use https://foundryvtt-rest-api-relay.fly.dev
- C)  You need to install the Foundry REST module.
-     [ThreeHats/foundryvtt-rest-api: A Foundry VTT module that provides a general purpose REST API through a WebSocket relay](https://github.com/ThreeHats/foundryvtt-rest-api)
+     of rest calls once you set the environmen variable FREE_API_REQUESTS_LIMIT (so adjust your docker-compose.yml with this line FREE_API_REQUESTS_LIMIT= 999999).    
+     [ThreeHats/foundryvtt-rest-api-relay](https://github.com/ThreeHats/foundryvtt-rest-api-relay) or use https://foundryvtt-rest-api-relay.fly.dev    
+ C)  You need to install the Foundry REST module.    
+     (ThreeHats/foundryvtt-rest-api: A Foundry VTT module that provides a general purpose REST API through a WebSocket relay](https://github.com/ThreeHats/foundryvtt-rest-api)   
  
 >[!IMPORTANT]
 > For first steps and probably most reliable functionality you should be logged in as a user into your foundry instance.
