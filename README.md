@@ -1,22 +1,23 @@
+
 # Obsidian MarkdownToFoundry Plugin
-Adjusts and exports the natively as HTML rendered Markdown from Obsidian to Foundry VTT.   
-An  [Obsidian](https://obsidian.md) plugin to copy notes as HTML to the clipboard, export as file and/or upload as journal to Foundry VTT.
+Adjusts and exports the natively as HTML rendered Markdown from Obsidian to Foundry VTT.  
+An [Obsidian](https://obsidian.md) plugin to copy notes as HTML to the clipboard, export as file and/or upload as journal to Foundry VTT.
 
 ## Why Obsidian and not directly in Foundry
 
-This is a purely personal view and while I love Foundry as a VTT it sucks at preparation:
+This is a purely personal view and while I love Foundry as a VTT it sucks in comparison at preparation/journal handling:
 
 ### Foundry Cons
 - The devs only improve marginally on Foundry journals. Journals are only a second or third thought in their considerations. (even their own
 content creators are affected by this if I am informed correctly)  
-- The editor sucks even though it could be made better with just a bit of effort (undo ist implemented only as keybinding so not easily found by new users,
-  font handling is a mess, html sanitizing seems to have been rolled up in a wild magic zone, etc.).
+- The editor sucks even though it could be made better with just a bit of effort (undo is implemented only as keybinding so not easily found by new users,
+  font handling is a mess, HTML sanitizing seems to have been rolled up in a wild magic zone, etc.).
 - Campaign management sucks (and if I get a tip or two I will try Ripper's module which seems quite nice)
 - It is a VTT (more or less)
 
 ### Obsidian pros
 - Better editor (with plugins, undo, formatting etc.)
-- Dataview plugin and now Base!
+- Dataview plugin and now Base (even if you need to use Dataview for my plugin)!
 - Second window during gameplay (one for Foundry one for Obsidian = more Screen size)
 - note centric + a lot of plugins for that
 - better/easier backup
@@ -29,16 +30,16 @@ A long time ago now it seems I read the following line:
 _"Stories grow from stories told"_
 
 The same can be said about software. I am a long time pen and paper player and even before the online VTT hype coming with corona which
-brought dozens of VTT software to the market I was allready playing online by skype (for 10 years) with my long time 20 year old group 
+brought dozens of VTT software to the market I was already playing online by Skype (for 10 years) with my long time 20 year old group 
 (so yes I am probably an old grandpa).
-I discovered Foundry VTT and it hooked me at once with it's ability to expand it with plugins, one time payment and self hosting.
-Lately they do not give so much concern to some basic functionality I deem essentialy in a VTT - which are journals. They changed
-the editor to Prose Mirror and it is still not able to import HTML in the same way as the old editor did and does. 
+I discovered Foundry VTT and it hooked me at once with its ability to expand it with plugins, one-time payment and self hosting.
+Lately they do not give so much concern to some basic functionality I deem essential in a VTT in my personal opinion - which are journals. They changed
+the editor to ProseMirror and it is still not able to import HTML in the same way as the old editor did and does. 
 I understand fully the economic drive to expand on new flashy graphical enterprises moving Foundry VTT more towards a computer game but the 
 essentials of a virtual TABLE top are in my eyes still handouts and text. I then discovered Obsidian MD which is a great tool
 for managing content and text for a GM, but getting content out of Obsidian and to Foundry was mildly spoken a pain. There are tons of
-HTML exporters but none of them could satisfy me and all needed additional manual adjustments which I needed to do outside in a second step.
-Then funny as it sounds I found out by coincidence and due to personal contact about a HTML exporter that essentially did what I needed.
+HTML exporters but none of them could satisfy me and all needed additional manual adjustments which I needed to do outside in a second convoluted step (often needing pandoc or similar tools).
+Then funny as it sounds I found out by coincidence and due to personal contact about an HTML exporter that essentially did what I needed.
 Blotspot released a derived work (https://github.com/blotspot/obsidian-markdown2html) this is where the line changes to:
 
 _"Software grows from software shared"_
@@ -48,50 +49,50 @@ It was not exactly what I needed but it was a great foundation! So we are back t
 _It was scary stuff, but radically advanced. I mean, it was great, it didn’t work the way I needed it, but... it gave us ideas, took us in new directions. 
 I mean, things we would have never... All my work is based on it._
 
-Thats when I searched for a way to import things into Foundry VTT to automate things and funny coincidence again I found a 2-3 month old newly released
-REST API module for Foundry VTT. Best of all the code was MIT AND the necessary relay server can be self hosted! PERFECT!
+That’s when I searched for a way to import things into Foundry VTT to automate things and funny coincidence again I found a 2–3 month old newly released
+REST API module for Foundry VTT. Best of all the code was MIT AND the necessary relay server can be self-hosted! PERFECT!
 
-So I decided to do it on my own. I had never really done something bigger than a macro in JavaScript or even touched Typescript. I learned tons about both
-doing this project. After all there is nothing better than to learn hands on a project. Still I would call this first release only a pretty stable BETA and my
-code surely is not elegant or exceptional - there is still much to do in that regards BUT it seems to work! I am also willing to allways listen :)
+So I decided to do it on my own. I had never really done something bigger than a macro in JavaScript or even touched TypeScript. I learned tons about both
+doing this project. After all there is nothing better than to learn hands-on a project. Still I would call this an early first release.  
+It is pretty stable and there are at least 10 other things I want to improve upon also my
+code surely is not elegant or exceptional - there is still much to do in that regards BUT it seems to work! I am also willing to always listen :)
 
 So if you like this and I hope and I am pretty sure you will like it as a GM, keep both authors of the building blocks of this plugin in mind:
 
-Blotspot has a Kofi Link in her manifest.json (https://ko-fi.com/blotspot).   
-ThreeHats has also a partreon find out more here (https://github.com/ThreeHats/foundryvtt-rest-api). 
-Also maybe give me a tip - once I figure out how to set that up - I think my age shows here. Gratefull for any tip how to do it.
+Blotspot has a Ko-fi Link in her manifest.json (https://ko-fi.com/blotspot).  
+ThreeHats has also a Patreon find out more here (https://github.com/ThreeHats/foundryvtt-rest-api). 
+Also maybe give me a tip - once I figure out how to set that up - I think my age shows here. Grateful for any tip how to do it.
 
 I also tried to keep HTML export and Foundry upload as separated as possible and I improved a lot on flexibility I think. But one goal would be to even better separate
-the code to do this and keep it clean. So you can use this also as a HTML exporter tool!
+the code to do this and keep it better structured and clean. So you can use this also as a HTML exporter tool!
 Maybe I will also export a markdownToHTML version or merge that part of the code with blotspot.
 
-I also want to thank the discord members on the Obsidian plugin-dev channel!   
-@saberzero1   
-@TyXaNuch   
-@joethei   
-@mnaoumov has been exceptionally kind and helpfull!! Thanks!!   
-
+I also want to thank the Discord members on the Obsidian plugin-dev channel!  
+@saberzero1  
+@TyXaNuch  
+@joethei  
+@mnaoumov has been exceptionally kind and helpful!! Thanks!!  
 
 ## What it does
 
 1. Converts the Markdown content of a note to HTML (either selected text or entire document) using Obsidian's markdown renderer. It also gives the option to
    export to Foundry VTT.
 2. Cleans up the HTML from the clutter obsidian (naturally) adds
-   - Removes all atrributes from tags (a list of attributes to keep can be configured in the settings)
+   - Removes all attributes from tags (a list of attributes to keep can be configured in the settings)
    - Removes all classes (a list of classes to keep can be configured in the settings)
    - Can convert internal images into base64 strings
    - Removes empty paragraphs and divs (left overs from comment blocks, for example)
    - allows for export profiles
    - allows for HTML tag replacement
    - allows for HTML modification with regex expressions
-   - allows to save HTML export to files (windows only so far and not too well tested yet)
+   - allows to save HTML export to files (Windows only so far and not too well tested yet)
    - allows to add a footer and header section for the exported HTML (so you can add a body tag and "style.css" for the file export)
    - allows to add your own JavaScript code (macro) to manipulate and adjust the HTML
    - allows to upload as journal to Foundry VTT
    - also uploads pictures and fixes picture paths for Foundry VTT
    - allows to relinking exported journal entries according to the Obsidian links
    - (planned if possible: batch export and relinking of stale links if a page is deleted and reexported)
-   - (planned: make it linux compatible)
+   - (planned: make it Linux compatible)
    - (planned: make it macOS compatible? and look into how to make it usable on Android)
 
 > [!NOTE]  
@@ -127,7 +128,7 @@ Beta plugins can be updated using the command palette by running the command `Ch
 ## Usage
 
 ### Variant 1:
-1. Use the MarkdownToFoundry Icon on the left side in the Obsidian panel. This will use the last active profile (in the settings or choosen by variant 2)
+1. Use the MarkdownToFoundry Icon on the left side in the Obsidian panel. This will use the last active profile (in the settings or chosen by variant 2)
 
 ### Variant 2:
 1. Open the context menu (right click) 
@@ -139,14 +140,14 @@ Beta plugins can be updated using the command palette by running the command `Ch
 
 # General information how the plugin works
 
-The plugin cleans the exported HTML from all clutter that Obsidian uses in it's rendered HTML. So in effect you have to tell the plugin what you want
+The plugin cleans the exported HTML from all clutter that Obsidian uses in its rendered HTML. So in effect you have to tell the plugin what you want
 to KEEP.
-Keep that in mind if you modify attributes or classes because you then need to exclude them explicitly from beeing removed!
+Keep that in mind if you modify attributes or classes because you then need to exclude them explicitly from being removed!
 
 Currently the plugin works in the following order:
 1) Convert images - convert image paths in HTML or convert to base64. Base64 encoding will overwrite any picture path links with the base64 encoded picture.  
-   For Foundry export you therefore need to disable Base64 encoding unless you want to copy and paste into Foundry VTT from the clippboard! (But Prose Mirror
-   is partly bugged in that regard - see explanations later)
+   For Foundry export you therefore need to disable Base64 encoding unless you want to copy and paste into Foundry VTT from the clipboard! (But ProseMirror
+   is partly bugged in that regard - again my personal view - see explanations later)
 3) Resolve internal links - resolve links in HTML to full internal links
 4) Replace HTML tags - replace one tag with the other tag (or even with nothing). It uses query selector syntax to do that. Make sure you use it correctly!
 5) Remove empty container - removes empty p and div nodes/containers which hold no inner content
@@ -163,21 +164,23 @@ Up to this point a HTML node view was manipulated! After these steps an HTML str
 >[!IMPORTANT]
 >You need to install configure three things for full Foundry VTT functionality! 
 
- A)  You need to install this plugin in Obsidian. This will give you HTML export and the ability to potentially push the HTML to Foundry VTT   
+ A)  You need to install this plugin in Obsidian. This will give you HTML export and the ability to potentially push the HTML to Foundry VTT  
+ 
  B)  You need to install a relay server or make an account with an open relay server which will be the communication hub between the 
      MarkdownToFoundry Obsidian plugin and the REST Foundry module. Installing the relay server locally will allow you to use an unlimited amount
-     of rest calls once you set the environmen variable FREE_API_REQUESTS_LIMIT (so adjust your docker-compose.yml with this line FREE_API_REQUESTS_LIMIT= 999999).    
-     [ThreeHats/foundryvtt-rest-api-relay](https://github.com/ThreeHats/foundryvtt-rest-api-relay) or use https://foundryvtt-rest-api-relay.fly.dev    
- C)  You need to install the Foundry REST module.    
-     (ThreeHats/foundryvtt-rest-api: A Foundry VTT module that provides a general purpose REST API through a WebSocket relay](https://github.com/ThreeHats/foundryvtt-rest-api)   
- 
+     of rest calls once you set the environment variable FREE_API_REQUESTS_LIMIT (so adjust your docker-compose.yml with this line FREE_API_REQUESTS_LIMIT= 999999).    
+     [ThreeHats/foundryvtt-rest-api-relay](https://github.com/ThreeHats/foundryvtt-rest-api-relay) or use [https://foundryvtt-rest-api-relay.fly.dev](https://foundryvtt-rest-api-relay.fly.dev)        
+     
+ C)  You need to install the Foundry REST module.       
+     (ThreeHats/foundryvtt-rest-api: A Foundry VTT module that provides a general purpose REST API through a WebSocket relay](https://github.com/ThreeHats/foundryvtt-rest-api)       
+
 >[!IMPORTANT]
 > For first steps and probably most reliable functionality you should be logged in as a user into your foundry instance.
 > You might get an error if you go inactive and the timeout to the relay server triggers.
 > In that case reload your foundry session and try again.
-> There is also a functionality to let the plugin login headless into a selected foundry instance but it is much slower.
+> There is also a functionality to let the plugin login headless into a selected foundry instance but it is much slower and not well tested yet.
 
----
+***
 
 ## Profile Management
 
@@ -189,7 +192,7 @@ Up to this point a HTML node view was manipulated! After these steps an HTML str
   
 Shows the active profile which will be used. If you press the FoundryToMarkdown button in the sidebar this
 is the profile which will be used.
-Inlcudes a default profile. If you get confused you can reset to some tried and meaningfull standard settings
+Includes a default profile. If you get confused you can reset to some tried and meaningful standard settings
 for HTML export.
 
 ### Existing Profiles
@@ -209,7 +212,7 @@ You can add new profiles or remove profiles here.
 If you want to slightly modify a profile without inputing everything you can clone a profile.
 Input a new name and the currently active profile will be cloned.
 
----
+***
 
 ## HTML Export Settings
 
@@ -227,8 +230,8 @@ You can define if a copy of the overworked HTML is pasted to the clipboard or no
   - Enable or disable file export.
   - Specify the file path for export.
 
-You can give a windows path to export your html to. Make sure the path is correct!   
-(TODO: Test for Linux and and make file path operations OS safe)
+You can give a Windows path to export your html to. Make sure the path is correct!   
+(TODO: Test for Linux and and make file path operations OS-safe)
 
 ### Dirty Export
 - **Description**: Export HTML without removing classes or attributes.
@@ -236,10 +239,10 @@ You can give a windows path to export your html to. Make sure the path is correc
 - **Toggle**: Enable or disable this feature.
 
 This setting is one of the interesting ones. It allows for a dirty export of your HTML.
-No changes will be made and you will see exactly what Obsidian exports. This is very helpfull
-to analyze the HTML and beeing able to create rules to clean the HTML to your own needs.
+No changes will be made and you will see exactly what Obsidian exports. This is very helpful
+to analyze the HTML and being able to create rules to clean the HTML to your own needs.
 
----
+***
 
 ## Attributes and Classes
 
@@ -264,7 +267,7 @@ You can specify which classes will NOT be cleaned from the HTML (see step 6)
 ### Reset classes to keep
 - A button to reset which classes shall be keept
 
----
+***
 
 ## Rule-Based Replacements
 
@@ -280,7 +283,7 @@ is set. The plugin uses query selector syntax.
 - **Description**: Add regex rules to modify the HTML during export.
 - **Example**: Use regex to replace specific patterns in the HTML.
 
-You can specify what regex rules are applied and in which order.   
+You can specify what regex rules are applied and in which order.  
 (TODO: Add examples)
 
 ### Javascript Replacements
@@ -291,17 +294,16 @@ You can write Javascript code to manipulate the HTML. The HTML is supplied as a 
 For Foundry export a function to generate a foundry compliant ID (api.createID) is also exposed. You need to end your
 function with "return 'variable holding the html string' " to return the modified HTML.
 
-#### Example:   
-(which will replcace all exported classes="secret" which are my callouts for GM stuff with the "secret" class of Foundry and give it an id)
+#### Example:  
+(which will replace all exported classes="secret" which are my callouts for GM stuff with the "secret" class of Foundry and give it an id)
 
-const newHtml = html.replace(/class="secret"/g, function(match) {   
-  const newId = api.createID();   
-  return `class="secret" id="secret-${newId}"`;   
-});   
-return newHtml   
+const newHtml = html.replace(/class="secret"/g, function(match) {  
+  const newId = api.createID();  
+  return `class="secret" id="secret-${newId}"`;  
+});  
+return newHtml  
 
-
----
+***
 
 ## Detailed Export Rules
 
@@ -327,10 +329,10 @@ been tested.
 - **Default**: Enabled.
 - **Toggle**: Enable or disable this feature.
 
-Encodes embeded images to Base64. You can then copy and paste directly into other applications like for example Bookstack. 
-Be aware that Prose Mirror in Foundry is in my personal opinion potentially bugged and developers seem to see that as a 
-"feature". Reports about strange sanitizing of HTML tags have been flagged as not to be implemented. Prose Mirror still remains
-behind in abilities beyond TinyMCE after all these years and in addition does wierd things to HTML. Also it does not seem
+Encodes embedded images to Base64. You can then copy and paste directly into other applications like for example Bookstack. 
+Be aware that ProseMirror in Foundry is in my personal opinion potentially bugged and developers seem to see that as a 
+"feature". Reports about strange sanitizing of HTML tags have been flagged as not to be implemented. ProseMirror still remains
+behind in HTML abilities to TinyMCE after all these years and in addition does weird things to HTML. Also it does not seem
 there is really any drive to develop a good HTML editor alternative as this issue/idea is open for 4 years now. 
 
 See my report: [Prose Mirror still stripping HTML wrongly and sanitizing too much � Issue #13167 � foundryvtt/foundryvtt](https://github.com/foundryvtt/foundryvtt/issues/13167)
@@ -339,11 +341,11 @@ One has to concede that the developers might be right in that regard as there pr
 journal handling else there would be a bigger need to fix those issues or patreon votes would be different.
 
 #### So here are some observations/bugs and tips:
-- Use the TinyMCE editor if you want to copy and past directly from clippboard!
-- Opening journals with Prose Mirror which work with TinyMCE might lead to sanitizing and breaking your journal
+- Use the TinyMCE editor if you want to copy and past directly from clipboard!
+- Opening journals with ProseMirror which work with TinyMCE might lead to sanitizing and breaking your journal
 - Do not use "id" attributes in tags you want to do an inner anchor link to
 - Do not place any base64 encoded pictures between span elements
-- Be carefull with span elements as they seem to be arbitrarily sanitized
+- Be careful with span elements as they seem to be arbitrarily sanitized
 - Font tags are problematic/useless (but I can understand that up to a point)
 - .... to be continued
   
@@ -355,7 +357,7 @@ journal handling else there would be a bigger need to fix those issues or patreo
 Removes the frontmatter from the html. I do not know who would like to use and have it in their HTML BUT
 they can if they like!
 
----
+***
 
 ## Foundry Export Settings
 
@@ -366,10 +368,12 @@ they can if they like!
 
 This will give the ability to export the html to Foundry VTT as a journal entry.
 You need to install the foundry REST module from ThreeHats and set up a relay server or use
-the one which ThreeHats supplies (currently free of charge but bandwith costs money!).
+the one which ThreeHats supplies (currently free of charge but bandwidth costs money!).
 
-1) Foundry REST Module: [ThreeHats/foundryvtt-rest-api: A Foundry VTT module that provides a general purpose REST API through a WebSocket relay](https://github.com/ThreeHats/foundryvtt-rest-api)
-2) Relay Server: [ThreeHats/foundryvtt-rest-api-relay](https://github.com/ThreeHats/foundryvtt-rest-api-relay) or use https://foundryvtt-rest-api-relay.fly.dev
+1) Foundry REST Module:    
+   [ThreeHats/foundryvtt-rest-api: A Foundry VTT module that provides a general purpose REST API through a WebSocket relay](https://github.com/ThreeHats/foundryvtt-rest-api)
+3) Relay Server:    
+   [ThreeHats/foundryvtt-rest-api-relay](https://github.com/ThreeHats/foundryvtt-rest-api-relay) or use [https://foundryvtt-rest-api-relay.fly.dev](https://foundryvtt-rest-api-relay.fly.dev)
 
 ### API Key
 - **Description**: API key for Foundry VTT export.
@@ -377,8 +381,8 @@ the one which ThreeHats supplies (currently free of charge but bandwith costs mo
 - **Input**: Enter the API key.
 
 You need an API key for the relay server. The API key is like your password so the Foundry instance
-authorizes agains the relay server and this plugin does so also. You get the API key
-from the Foundry VTT RELAY once you made an account. Then you need to input that API key into your Foundry module AND the Obsidian Plugin!   
+authorizes against the relay server and this plugin does so also. You get the API key
+from the Foundry VTT RELAY once you made an account. Then you need to input that API key into your Foundry module AND the Obsidian Plugin!  
 
 ### Relay Server
 - **Description**: IP or URL of the relay server for Foundry VTT.
@@ -388,22 +392,22 @@ from the Foundry VTT RELAY once you made an account. Then you need to input that
 This defines the relay server to use. ThreeHats is so generous to supply a public one. You can also set
 up your own. Be aware that the relay server only handles requests with a payload of a maximum of 250 MB!!!
 So please do not try to upload journals with pictures/maps bigger than 250 MB! Also use compression on your pictures!
-Be reminded again bandwith costs money.
+Be reminded again bandwidth costs money.
 
 ### Foundry Session ID
 - **Description**: Specify the Foundry world ID for export.
 - **Default**: First active world is used if no ID is specified. This can lead to random results.
 - **Input**: Enter the Foundry session ID.
 
-Each Foundry session has a unique ID which is derived from the server, the world and the user loged in.
-You can get this informmation from the Foundry module or with the helper button of the plugin.
+Each Foundry session has a unique ID which is derived from the server, the world and the user logged in.
+You can get this information from the Foundry module or with the helper button of the plugin.
 
 ### Helper to get Foundry Session ID
- **Description**: This button press will do a call agains the relay server and list all connected instances.
+ **Description**: This button press will do a call against the relay server and list all connected instances.
 - **Default**: First active world is used if no ID is specified. This can lead to random results.
 - **Input**: Choose one session ID from the dropdown
 
-This button is to help you determine which session ID's are available. If you have only one Foundry instance
+This button is to help you determine which session IDs are available. If you have only one Foundry instance
 running you will only see one session ID. Also your Foundry installed Foundry module needs to be ACTIVE!
 After some time even an active Foundry instance will drop the connection to the relay server! This is intended!
 This means the best and safest way to get your session ID is to log in to your Foundry instance(s) and then press
@@ -422,7 +426,7 @@ Just import your next journal/page and use the macro to link both journals/pages
 
 (Example how this works and what advantages an Obsidian UUID has)
 
----
+***
 
 ## Foundry Headless Login Settings
 
@@ -432,7 +436,7 @@ Just import your next journal/page and use the macro to link both journals/pages
 - **Toggle**: Enable or disable this feature.
 
 If all goes well (needs deeper testing) this will allow Obsidian to connect to your specified
-Foundry session without you beeing logged in. This is slower because of the login process and
+Foundry session without you being logged in. This is slower because of the login process and
 probably will only make sense much later IF a batch export can be done.
 
 ### Foundry Server IP
@@ -456,7 +460,7 @@ probably will only make sense much later IF a batch export can be done.
 >You can use the "worldTitle" which the helper button will show or the "customName"
 >which you applied in your Foundry module.
 
----
+***
 
 ## Foundry Standard Export Settings
 
@@ -469,7 +473,7 @@ will overwrite standard settings. If no settings are found the plugin will defau
 >[!IMPORTANT]
 >Do NOT use file path slashes at the beginning or end of your paths in this settings!    
 > DO: assets/pictures    
-> DO NOT DO!!: /assets/pictures or assets/pictures/   
+> DO NOT DO!!: /assets/pictures or assets/pictures/  
 
 ### Journal Linking After Every Export
 - **Description**: Automatically run a journal linking process after each export.
@@ -510,9 +514,9 @@ note as a NEW entry in Foundry and set a new VTT_UUID.
 You will then have two Journals with the same obsidian UUID in Foundry. If a relinking takes place any not yet relinked note linking
 to those two notes will be a randomly linked to the first (internally) found note with this obsidian UUID. So you need to do a delete
 before a relink run.
-(planned: way to relink such allready linked notes to the correct remaining note if only one remains after deleting the unwanted note)
+(planned: way to relink such already linked notes to the correct remaining note if only one remains after deleting the unwanted note)
 
----
+***
 ## API Documentation
 
-- Obsidian: https://github.com/obsidianmd/obsidian-api
+- Obsidian: [https://github.com/obsidianmd/obsidian-api](https://github.com/obsidianmd/obsidian-api)
