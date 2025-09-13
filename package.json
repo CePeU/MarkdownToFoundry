@@ -22,8 +22,11 @@
   "author": "CePeU",
   "license": "MIT",
   "devDependencies": {
+    "@types/codemirror": "^5.60.16",
+    "@types/css-font-loading-module": "^0.0.14",
     "@types/electron": "^1.6.12",
     "@types/node": "^16.11.6",
+    "@types/tern": "^0.23.9",
     "@typescript-eslint/eslint-plugin": "^8.37.0",
     "@typescript-eslint/parser": "^8.37.0",
     "builtin-modules": "3.3.0",
@@ -39,6 +42,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "tsc": "^2.0.4",
     "xxhash-wasm": "^1.1.0"
   }
 }

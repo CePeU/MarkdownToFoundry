@@ -85,6 +85,116 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
 		foundryMacroLinkingRun: false,
 		foundryWriteFrontmatter: false,
 	},
+	"Foundry_export": {
+    "attributeList": [
+      "alt",
+      "colspan",
+      "data-callout",
+      "data-callout-fold",
+      "data-callout-metadata",
+      "data-heading",
+      "height",
+      "href",
+      "open",
+      "rowspan",
+      "src",
+      "width"
+    ],
+    "classList": [
+      "callout"
+    ],
+    "isActiveProfile": true,
+    "rulesForTags": [
+      [
+        "div[data-callout=\"secret\"]",
+        "section"
+      ],
+      [
+        "div.callout-title",
+        "summary"
+      ],
+      [
+        "div.callout",
+        "details"
+      ],
+      [
+        "div.callout-title-inner",
+        "span"
+      ],
+      [
+        "svg.lucide-copy",
+        ""
+      ],
+      [
+        "svg",
+        ""
+      ],
+      [
+        "a.tag",
+        ""
+      ],
+      [
+        "span[alt]",
+        "p"
+      ]
+    ],
+    "rulesForRegex": [
+      [
+        "data-callout-fold=\"\"/gm",
+        "open"
+      ],
+      [
+        "data-callout-fold=\"\\+\"/gm",
+        "open"
+      ],
+      [
+        "data-callout-fold=\"\\-\"/gm",
+        ""
+      ],
+      [
+        "<section\\s+data-callout=\"secret\"\\s+class=\"callout\"><summary><span>(.*?)<\\/span><\\/summary>/gm",
+        "<section  class=\"secret\">"
+      ],
+      [
+        "data-heading=\"([^\"]*<font\\s+color=[^>]+>[^<]*<\\/font>[^\"]*)\"/gm",
+        ""
+      ]
+    ],
+    "jsCode": "const newHtml = html.replace(/class=\"secret\"/g, function(match) {\n  const newId = api.createID();  // Called once per match ✅\n  return `class=\"secret\" id=\"secret-${newId}\"`;\n});\nreturn newHtml",
+    "exportDirty": false,
+    "exportFile": false,
+    "exportClipboard": true,
+    "exportFoundry": true,
+    "internalLinkResolution": true,
+    "htmlExportFilePath": "",
+    "encodePictures": false,
+    "removeFrontmatter": true,
+    "foundryApiKey": "",
+    "foundryRelayServer": "https://foundryvtt-rest-api-relay.fly.dev",
+    "assetSaveRuleset": [
+      [
+        "",
+        ""
+      ]
+    ],
+    "foundryHeadlessUsed": false,
+    "foundryUser": "Gamemaster",
+    "foundryPW": "",
+    "foundryWorld": "",
+    "foundryClientId": "",
+    "foundryIP": "",
+    "excludeFoldersByregex": "",
+    "footerAndHeader": [
+      "",
+      ""
+    ],
+    "foundrySettingsUsed": false,
+    "foundryFolder": "Obsidian Export",
+    "foundryJournal": "Obsidian",
+    "foundryPicturePath": "assets/pictures",
+    "foundryMacroLinkingRun": true,
+    "foundryWriteFrontmatter": false
+  }
 };
 
 export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
