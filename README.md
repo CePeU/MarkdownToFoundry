@@ -549,7 +549,7 @@ after each import.
 - **Toggle**: Enable or disable this feature.
 
 This will write information about your exported note to the Obsidian note frontmatter. 
-It also will give your obsidian note an UUID which can be used by the plugin to find the Obsidian note and the corresponding Foundry note   
+It also will give your obsidian note an UUID which can be used by the plugin to find the Obsidian note and the corresponding Foundry note
 regardless if the Obsidian note has been moved.
 
 #### How this works:
@@ -569,9 +569,17 @@ to those two notes will be a randomly linked to the first (internally) found not
 before a relink run.
 (planned: way to relink such already linked notes to the correct remaining note if only one remains after deleting the unwanted note)
 
+**To make it clear:**
+The plugin does NOT search Foundry, checks if an Obsidian note with an Obsidian UUID exists allready and does adjustments to update the Foundry note
+according to these informations! The source of truth is Obsidian! Folders and Journal destinations AND the name of the Note determine if a
+note will be exported or updated. Of course this also determines the destination where it will be created/updated in Foundry.
+So far the Obsidian UUID is for relinking notes correctly even if the location and name of the note in Foundry change. This can thus still
+lead to two Foundry pages having the same Obsidian UUID if they are exported twice to different locations in Foundry (Folder/Journal)
+
 ***
 ## API Documentation
 
 - Obsidian: [https://github.com/obsidianmd/obsidian-api](https://github.com/obsidianmd/obsidian-api)
+
 
 
