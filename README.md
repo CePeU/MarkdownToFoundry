@@ -221,7 +221,10 @@ Input a new name and the currently active profile will be cloned.
 - **Default**: Enabled.
 - **Toggle**: Enable or disable this feature.
 
-You can define if a copy of the overworked HTML is pasted to the clipboard or not.
+You can define if a copy of the overworked HTML is pasted to the clipboard or not.   
+This is especially helpfull if you are developing a new export profile as you can see what will
+be delivered to Foundry VTT. Also this allows for copy and paste into other applications like
+for example Bookstack.
 
 ### File Export
 - **Description**: Export the HTML to a file.
@@ -277,14 +280,53 @@ You can specify which classes will NOT be cleaned from the HTML (see step 6)
 
 You can specify which tags are replaced or changed and what rule to use. Also the order of the rules applied
 is set. The plugin uses query selector syntax.   
-(TODO: Add examples)
+
+#### Example:
+An Obsidian callout of this type ">[!secret]+ Some Secret GM Stuff" needs to be made into a secret in Foundry VTT.   
+The dirty HTML ouput is somethink like this:   
+`<div ... data-callout="secret"...> ... </div>`   
+For Foundry VTT we need a "section" tag instead of a div tag. So we change the tag.  
+
+The rule fields are filled with:   
+Field1: div[data-callout="secret"]     
+Field2: secret   
+
+We use the query selector div[data-callout="secret"] which will trigger on every div with an attribute data-callout="secret"
+and change each div which matches to a "section" tag.   
+The output result will be something like this:   
+`<section ... data-callout="secret"...> ... </section>`    
+
+Keep in mind we only changed the tag! The attributes remain!
 
 ### Regex Replacement Rules
 - **Description**: Add regex rules to modify the HTML during export.
 - **Example**: Use regex to replace specific patterns in the HTML.
 
 You can specify what regex rules are applied and in which order.  
-(TODO: Add examples)
+
+#### Example:
+Remember that our tag has now been changed to a section tag but the attributes and classes remain?   
+Some other tags have also changed during the tag replacement according to the rules set there.   
+We no have an output like this:   
+`<section ... data-callout="secret"...class="callout"> <summary><span> Some Secret GM Stuff</span></summary>...</section>`    
+This output would be a nice foldable details structure if not for the section tags.   
+In fact this is how a callout which is not of type secret is exported.   
+It would look like this:   
+`<details ... data-callout="secret"...class="callout"> <summary><span> Some Secret GM Stuff</span></summary>...</details>`   
+
+But for our usecase we need a section with a class="secret" and an id with a random uuid conforming to Foundry requirements.   
+It would look like this:   
+`<section class="secret" id="xxxxxxxxxxxx"> Secret Text here </section>`   
+
+So the next step is to grab the correct HTML tag and classes and rewrite them. This is allready done as   
+a string operation on the HTML text and not as a node parsing. So we input the following Regex expression:   
+
+Field1:`<section[^>]*data-callout="secret"[^>]*class="callout"[^>]*>\s*<summary><span>(.*?)<\/span><\/summary>/g`
+and the desired replacement   
+Field2: `<section  class="secret">`   
+
+The result will be something like this:   
+`<section  class="secret"> Your secret text </section>section>`   
 
 ### Javascript Replacements
 - **Description**: Add custom JavaScript functions to modify the HTML during export.
@@ -303,6 +345,8 @@ const newHtml = html.replace(/class="secret"/g, function(match) {
 });  
 return newHtml  
 
+This will replace als classes="secret" texts with classes="secret" id="xxxxxxxxx" and generate the desired HTML:
+`<section  class="secret" id="xxxxxxxxxx"> Your secret text </section>section>`  
 ***
 
 ## Detailed Export Rules
@@ -313,7 +357,7 @@ return newHtml
   - Add or edit header and footer content.
 
 You can add any text you like as header and footer to the output html text. Make sure it makes sense!
-(For Foundry you thus can wrap the whole export in a div with a special class and bind css to that)    
+(For Foundry you thus can wrap the whole export in a div with a special class and bind your css to that)    
 
 ### Wikilink Resolution
 - **Description**: Resolve internal Obsidian wikilinks and export them with the Obsidian vault path.
