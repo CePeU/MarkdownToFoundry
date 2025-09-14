@@ -341,11 +341,11 @@ function with "return 'variable holding the html string' " to return the modifie
 
 const newHtml = html.replace(/class="secret"/g, function(match) {  
   const newId = api.createID();  
-  return `class="secret" id="secret-${newId}"`;  
+  return \`class="secret" id="secret-${newId}"\`;  
 });  
 return newHtml  
 
-This will replace als classes="secret" texts with classes="secret" id="xxxxxxxxx" and generate the desired HTML:
+This will replace als classes="secret" texts with classes="secret" id="xxxxxxxxx" and generate the desired HTML:   
 `<section  class="secret" id="xxxxxxxxxx"> Your secret text </section>section>`  
 ***
 
@@ -564,3 +564,4 @@ before a relink run.
 ## API Documentation
 
 - Obsidian: [https://github.com/obsidianmd/obsidian-api](https://github.com/obsidianmd/obsidian-api)
+
