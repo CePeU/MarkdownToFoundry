@@ -549,13 +549,22 @@ after each import.
 - **Toggle**: Enable or disable this feature.
 
 This will write information about your exported note to the Obsidian note frontmatter. 
-It also will give your obsidian note an UUID which can be used by the plugin to find the Obsidian note and the corresponding Foundry note. 
+It also will give your obsidian note an UUID which can be used by the plugin to find the Obsidian note and the corresponding Foundry note   
+regardless if the Obsidian note has been moved.
+
+#### How this works:
+The plugin exports additional meta information with your export (Foundry flags). Each page/note will receive informations about
+where it comes from. The unique information in obsidian is the file location. No location can hold two notes of the same name. 
+As long as name or location do not change the note/page can be uniquely identified and thus linked to other obsidian notes which have been exported.
+If your note changes name or file location it becomes a "new" note. If that is not desired you can write frontmatter information which
+will create a (statistically) unique Obsidian UUID, store it in your note as frontmatter and export it to foundry as a unique identifier.
+During relinking of notes the plugin will relink based on Obsidian UUID first and then based on name and file location.
 
 VTT_xxx frontmatter settings are foundry specific information.
 The plugin will try to find the correct note for relinking but using an UUID should make updates, and relinking more stable.
 Be aware that changing the frontmatter after your first import (like for example changing the folder) will reimport your
-note as a NEW entry in Foundry and set a new VTT_UUID.
-You will then have two Journals with the same obsidian UUID in Foundry. If a relinking takes place any not yet relinked note linking
+note as a NEW entry in Foundry and set a new Foundry VTT_UUID.
+You will then have two Journals with the same Obsidian UUID in Foundry. If a relinking takes place any not yet relinked note linking
 to those two notes will be a randomly linked to the first (internally) found note with this obsidian UUID. So you need to do a delete
 before a relink run.
 (planned: way to relink such already linked notes to the correct remaining note if only one remains after deleting the unwanted note)
@@ -564,4 +573,5 @@ before a relink run.
 ## API Documentation
 
 - Obsidian: [https://github.com/obsidianmd/obsidian-api](https://github.com/obsidianmd/obsidian-api)
+
 
