@@ -24,7 +24,7 @@ See:[Issue #16](https://github.com/CePeU/MarkdownToFoundry/issues/16)
 - Changed hirarchy of settings
 All linking/relinking selections have been put under  **Foundry journal relinking export settings**
 - The plugin is now able to check the version information and reimport profiles to new profile structures
-
+- Readme was adjusted to include documentation for new macro settings
 
 
 ## [1.0.2] / 2025-09-14

@@ -13,7 +13,7 @@ import {
 	FileSystemAdapter,
 	Notice,
 } from "obsidian";
-import { showBrowserNotification, ObsidianPicture } from "src/utils";
+import { showBrowserNotification, ObsidianPicture,debug } from "./utils";
 
 
 /**
@@ -196,7 +196,7 @@ export function generateIdForFile(app: App, file: TFile): string {
 }
 
 export async function apiPost_CreateFoundryMacro(apiKey: string, clientId: string, relayServer: string): Promise<any> {
-	console.debug(" M2F:apiPost_CreateFoundryMacro function was started")
+	debug.log("apiPost_CreateFoundryMacro function was started")
 	//$baseUrl/execute-js?clientId=$clientId
 
 	if (!apiKey || !clientId || !relayServer) return "";
@@ -227,7 +227,7 @@ export async function apiPost_CreateFoundryMacro(apiKey: string, clientId: strin
 				} catch (error) {
 					console.error("M2F: apiPost_CreateFoundryMacro error: ", error.message);
 				}
-			console.debug(" M2F:apiPost_CreateFoundryMacro response data: ",response ?? "No data could be retrieved")
+			debug.log("apiPost_CreateFoundryMacro response data: ",response ?? "No data could be retrieved")
 			
 	const macroResponse = response?.json?.result ?? []
 	return macroResponse
@@ -376,7 +376,7 @@ export class Foundry {
 				} catch (error) {
 					console.error("M2F: apiPost_CreateLinking error: ", error.message);
 				}
-			console.debug("M2F: apiPost_CreateLinking response data: ",response ?? "No data could be retrieved")
+			debug.log("apiPost_CreateLinking response data: ",response ?? "No data could be retrieved")
 			
 		const macroResponse = response?.json?.result ?? []
 		return macroResponse
@@ -439,7 +439,7 @@ export class Foundry {
 	}
 	// creates or updates a page - creation goes like this: create Journal => create page/updated page for batch import creates and updates should be bundled
 	async createOrUpdatePage() {
-		console.debug("M2F: Create or Update Pages function started")
+		debug.log("Create or Update Pages function started")
 		const todo = {
 			createPage: false, // true if the page needs to be created
 			updatePage: false, // true if the page needs to be updated
@@ -506,7 +506,7 @@ export class Foundry {
 					}
 				} else {
 					//todo.pageNeedsJournal = true; // the page needs a journal to be created
-					console.debug(`Destination Journal was not found a new one names ${this.noteJournalDestinationName} will be created`)
+					debug.log(`Destination Journal was not found a new one names ${this.noteJournalDestinationName} will be created`)
 					this.noteJournalDestinationId = await this.apiPost_CreateJournal(Foundry.foundryApiKey, Foundry.clientId, Foundry.foundryRelayServer, this.noteJournalDestinationName, this.noteFolderDestinationId)
 					todo.pageNeedsJournal = false
 					todo.createPage = true
@@ -535,7 +535,7 @@ export class Foundry {
 
 		let updateFrontmatter = false
 		if (todo.updatePage) {
-			console.debug("M2F: A page update is necessary")
+			debug.log("A page update is necessary")
 			this.notePageId = await this.apiPut_CreatePage(Foundry.foundryApiKey, Foundry.clientId, Foundry.foundryRelayServer)
 			updateFrontmatter = false
 			//the assignment should not be necessary as this is an update and the id shoul be existent
@@ -543,7 +543,7 @@ export class Foundry {
 		}
 
 		if (todo.createPage) {
-			console.debug("A page create is necessary")
+			debug.log("A page create is necessary")
 			updateFrontmatter = true
 			// create a Page in a journal
 			// possibly this needs to include the following steps also
@@ -561,7 +561,7 @@ export class Foundry {
 		}
 
 		if (Foundry.settings.foundryMacroLinkingRun) {
-			console.debug("M2F: Linking run started")
+			debug.log("Linking run started")
 			await this.apiPost_CreateLinking(Foundry.foundryApiKey, Foundry.clientId, Foundry.foundryRelayServer)
 		}
 	}
@@ -572,7 +572,7 @@ export class Foundry {
 	}
 
 	static async readFrontmatter(app: App, file: TFile): Promise<ObsdianFrontmatterInfo> {
-		console.debug("M2F: Frontmatter read started - working on file:", file.path)
+		debug.log("Frontmatter read started - working on file:", file.path)
 		//let frontMatterCache = app.metadataCache.getFileCache(file)?.frontmatter // not used any more in this function just for console.log out!
 		//console.log("Frontmatter Cache: ", frontMatterCache)
 
@@ -643,7 +643,7 @@ export class Foundry {
 	 */
 	//
 	static async init(app: App, settings: MarkdownToFoundrySettings) {
-		console.debug("M2F: INIT for Foundry export was executed")
+		debug.log("INIT for Foundry export was executed")
 		Foundry.app = app;
 		Foundry.settings = settings;
 		Foundry.foundryApiKey = settings.foundryApiKey || "";
@@ -909,9 +909,9 @@ export class Foundry {
 					throw new Error(`HTTP error! status: ${response?.status} - Error text: ${response?.text}`);
 					}
 				} catch (error) {
-					console.debug("M2F: apiPost_startHeadlessSession/handshake error: ", error.message);
+					debug.log("apiPost_startHeadlessSession/handshake error: ", error.message);
 				}
-			console.debug("M2F: apiPost_startHeadlessSession/handshake response data: ",response ?? "No data could be retrieved")
+			debug.log("apiPost_startHeadlessSession/handshake response data: ",response ?? "No data could be retrieved")
 
 			const { token, publicKey, nonce } = response?.json;
 			// Step 2: Encrypt password and nonce
@@ -951,7 +951,7 @@ export class Foundry {
 				} catch (error) {
 					console.error("M2F: apiPost_startHeadlessSession/session error: ", error.message);
 				}
-			console.debug("M2F: apiPost_startHeadlessSession/session response data: ",response ?? "No data could be retrieved")
+			debug.log("apiPost_startHeadlessSession/session response data: ",response ?? "No data could be retrieved")
 			
 			clientId = response?.json?.clientId || ""
 			Foundry.sessionId = response?.json?.sessionId || ""
@@ -1004,7 +1004,7 @@ export class Foundry {
 		} catch (error) {
 			console.error("M2F: apiDelete_endHeadlessSession error: ", error.message);
 			}
-		console.debug("M2F: apiDelete_endHeadlessSession response data: ",response ?? "No data could be retrieved")		
+		debug.log("apiDelete_endHeadlessSession response data: ",response ?? "No data could be retrieved")		
 		
 	} catch (error) {
 			console.error('Error:', error.response?.json || error.message);
@@ -1016,7 +1016,7 @@ export class Foundry {
 	} // End of session function
 
 	static async apiGet_APIStatus(relayServer: string, apiKey: string): Promise<boolean> {
-		console.debug("M2F: apiGet_APIStatus function started")
+		debug.log("apiGet_APIStatus function started")
 		const calltype = "/api/status";
 		const url = relayServer + calltype;
 		let apiRunning = false;
@@ -1037,7 +1037,7 @@ export class Foundry {
 		} catch (error) {
 		console.error("M2F: apiGet_APIStatus error: ", error.message);
 		}
-		console.debug("M2F: apiGet_APIStatus response data: ",response ?? "No data could be retrieved")
+		debug.log("apiGet_APIStatus response data: ",response ?? "No data could be retrieved")
 
 
 		if (response?.json?.status === "ok") {
@@ -1047,7 +1047,7 @@ export class Foundry {
 	}
 
 	static async apiGet_ClientId(relayServer: string, apiKey: string): Promise<string> {
-		console.debug("M2F: apiGet_ClientId function entered")
+		debug.log("apiGet_ClientId function entered")
 		
 		let clientId = "";
 		const calltype = "/clients";
@@ -1071,7 +1071,7 @@ export class Foundry {
 		} catch (error) {
 			console.error("M2F: apiGet_ClientId error: ", error.message);
 		}
-		console.debug("M2F: apiGet_ClientId response data: ",response ?? "No data could be retrieved")
+		debug.log("apiGet_ClientId response data: ",response ?? "No data could be retrieved")
 		
 
 		const clientList: any[] = response?.json?.clients ?? [];
@@ -1100,7 +1100,7 @@ export class Foundry {
 	}
 
 	static async apiGet_FoundryClientList(relayServer: string, apiKey: string) {
-		console.debug("Returned a LIST of connected clients: apiGet_FoundryClientList")
+		debug.log("Returned a LIST of connected clients: apiGet_FoundryClientList")
 		const calltype = "/clients";
 		const url = relayServer + calltype;
 
@@ -1121,7 +1121,7 @@ export class Foundry {
 		} catch (error) {
 			console.error("M2F: apiGet_FoundryClientList error: ", error.message);
 		}
-		console.debug("M2F: apiGet_FoundryClientList retrieved: ", response ?? "Data could not be retrieved")
+		debug.log("apiGet_FoundryClientList retrieved: ", response ?? "Data could not be retrieved")
 		
 		const clientList: any[] = response?.json?.clients ?? [];
 
@@ -1155,7 +1155,7 @@ export class Foundry {
 				} catch (error) {
 					console.error("M2F: apiGet_AllPictureFilePaths error: ", error.message);
 				}
-			console.debug("M2F: apiGet_AllPictureFilePaths response data: ",response ?? "No data could be retrieved")
+			debug.log("apiGet_AllPictureFilePaths response data: ",response ?? "No data could be retrieved")
 			
 		const toBeFiltered: FoundryFile[] = response?.json?.results ?? [] //response.json.files;
 		
@@ -1193,7 +1193,7 @@ export class Foundry {
 
 
 	public async writeFrontmatter(app: App, file: TFile, update: boolean = false) {
-		console.debug("M2F: writeFrontmatter is beeing executed")
+		debug.log("writeFrontmatter is beeing executed")
 		if (Foundry.settings.foundryWriteFrontmatter) {
 			// Assume 'file' is a TFile object representing your note
 			await app.fileManager.processFrontMatter(file, frontmatter => {
@@ -1236,7 +1236,7 @@ export class Foundry {
 
 
 	static async apiGet_AllFolders(relayServer: string, apiKey: string, clientId: string): Promise<FoundryFolder[]> {
-		console.debug("M2F: apiGet_AllFolders got executed")
+		debug.log("apiGet_AllFolders got executed")
 		//$baseUrl/execute-js?clientId=$clientId
 		let folderList: FoundryFolder[] = [];
 		
@@ -1270,7 +1270,7 @@ export class Foundry {
 				} catch (error) {
 					console.error("M2F: apiGet_AllFolders apiGet_AllFolders error: ", error.message);
 				}
-			console.debug("M2F: apiGet_AllFolders response data: ",response ?? "No data could be retrieved")
+			debug.log("apiGet_AllFolders response data: ",response ?? "No data could be retrieved")
 			
 		folderList = response?.json?.result ?? [];
 
@@ -1286,7 +1286,7 @@ export class Foundry {
 
 
 	static async apiGet_AllJournals(relayServer: string, apiKey: string, clientId: string): Promise<FoundryJournal[]> {
-		console.debug("M2F: apiGet_AllJournals function entered")
+		debug.log("apiGet_AllJournals function entered")
 		let journalList: FoundryJournal[] = [];
 		//$baseUrl/execute-js?clientId=$clientId
 		
@@ -1320,14 +1320,14 @@ export class Foundry {
 				} catch (error) {
 					console.error("M2F: apiGet_AllJournals error: ", error.message);
 				}
-			console.debug("M2F: apiGet_AllJournals response data: ",response ?? "No data could be retrieved")
+			debug.log("apiGet_AllJournals response data: ",response ?? "No data could be retrieved")
 			
 		journalList = response?.json?.result ?? [];
 		return journalList
 	}
 
 	async apiPost_CreateFolder(apiKey: string, clientId: string, relayServer: string, folderName: string, parentFolderId: string): Promise<string> {
-		console.debug("M2F: apiPost_CreateFolder function started")
+		debug.log("apiPost_CreateFolder function started")
 		//$baseUrl/execute-js?clientId=$clientId
 		
 		if (!apiKey || !clientId || !relayServer) return "";
@@ -1369,7 +1369,7 @@ export class Foundry {
 				} catch (error) {
 					console.error("M2F: apiPost_CreateFolder error: ", error.message);
 				}
-			console.debug("M2F: apiPost_CreateFolder response data: ",response ?? "No data could be retrieved")
+			debug.log("apiPost_CreateFolder response data: ",response ?? "No data could be retrieved")
 			
 		const folderId = response?.json?.result?._id ?? ""
 		return folderId
@@ -1377,7 +1377,7 @@ export class Foundry {
 
 
 	public async apiPost_CreateJournal(apiKey: string, clientId: string, relayServer: string, journalName: string, folderId: string): Promise<string> {
-		console.debug("M2F: apiPost_CreateJournal has started");
+		debug.log("apiPost_CreateJournal has started");
 		const calltype = "/create?clientId=" + clientId;
 
 		const url = relayServer + calltype;
@@ -1425,7 +1425,7 @@ export class Foundry {
 				} catch (error) {
 					console.error("M2F: apiPost_CreateJournal error: ", error.message);
 				}
-			console.debug("M2F: apiPost_CreateJournal response data: ",response ?? "No data could be retrieved")
+			debug.log("apiPost_CreateJournal response data: ",response ?? "No data could be retrieved")
 			
 		const journalId = response?.json?.uuid ?? "";
 		//The API returns JournalEntry.xxxIDxxx we need want to keept it consistent
@@ -1435,7 +1435,7 @@ export class Foundry {
 	}
 
 	public async apiPut_CreatePage(apiKey: string, clientId: string, relayServer: string): Promise<string> {
-		console.debug("M2F: apiPut_CreatePage got executed")
+		debug.log("apiPut_CreatePage got executed")
 		let returnPageId = ""
 		//{{baseUrl}}/update?clientId={{clientId}}&uuid=JournalEntry.SZ4OjfnRipsVMbvX
 		if (!this.noteJournalDestinationId) {
@@ -1447,7 +1447,7 @@ export class Foundry {
 		let updatePage = {};
 		if (this.notePageId === undefined || this.notePageId === "") {
 			// creates a new page as the page does not exist in the journal
-			console.log("Page create in progress", this.noteHtml);
+			debug.log("apiPut_CreatePage - page CREATE in progress", this.noteHtml);
 			updatePage = {
 				"pages": [
 					{
@@ -1483,8 +1483,7 @@ export class Foundry {
 				],
 			};
 		} else {
-			console.log("Page update in progress")
-		
+			debug.log("apiPut_CreatePage - page UPDATE in progress", this.noteHtml);
 			// updates the page according to the page id
 			updatePage = {
 				pages: [
@@ -1544,7 +1543,7 @@ export class Foundry {
 				} catch (error) {
 					console.error("M2F: apiPut_CreatePage error: ", error.message);
 				}
-			console.debug("M2F: apiPut_CreatePage response data: ",response ?? "No data could be retrieved")
+			debug.log("apiPut_CreatePage response data: ",response ?? "No data could be retrieved")
 		const pageList: any = response?.json?.entity?.[0]?.pages ?? []
 		if (this.notePageId === undefined || this.notePageId === "") {
 			const filteredResponse = pageList.filter(
@@ -1561,6 +1560,7 @@ export class Foundry {
 	}
 
 	public static async apiPost_ListOfFiles() {
+		debug.log("apiPost_ListOfFiles - Picture upload of:", Foundry.ObsidianPictureCollection);
 		// Need to refetch the file list in Foundry! Because this could be a new
 		// manual import and NOT a batch! So to avoid to overwrite I need an update
 		// either at the START or at the END to update the shared information in
@@ -1638,7 +1638,7 @@ export class Foundry {
 				} catch (error) {
 					console.error("M2F: apiPost_ListOfFiles error: ", error.message);
 				}
-			console.debug("M2F: apiPost_ListOfFiles response data: ",response ?? "No data could be retrieved")
+			debug.log("apiPost_ListOfFiles response data: ",response ?? "No data could be retrieved")
 			
 				const responseMessage =
 					Foundry.ObsidianPictureCollection[0].ObsidianPictureName +
@@ -1660,6 +1660,51 @@ export class Foundry {
 	}
 
 	//== picure Upload List Funktion
+	// function to build a list of all embedded pictures in a note
+	// with their hash and other information needed for upload
+	// pictureSavePath is the path in foundry where the pictures should be saved
+	// e.g. /obsidian-files/pictures
+	// returns a list of ObsidianPicture objects
+	
+	//BUT IT NEEDS TO BUILD THE PICTURE LIST OUT OF THE NOTE HTML and NOT the EMBEDS
+	//because the embeds do not contain all pictures if they are only linked and not embedded
+	//so we need to parse the HTML for <img> tags and get the src attribute
+	//REWORK: use a DOM parser to extract <img> tags from the note HTML
+	//TODO: Check if all informations will be available if the picture is only linked and not embedded
+
+	//OBSERVATION:
+	//1) The ALT tag holds the image name and sometimtes the path - if it is an internal link it is relative to the vault root
+	// attention! the alt tag can also be empty or contain a description of the image!!
+	//1.1) We drop any image name which do not match a defined image extension and return no picture object
+	//1.2) We drop any image name which is a URL (starts with http or https)
+	//2) The SRC tag holds the path to the image - if it is an internal link it is relative to the vault root
+	// so a regex will match at least the vault base path we can get the vault base path from the adapter
+	//2.1) We drop any image which is a URL (starts with http or https)
+	//2.2) We drop any image which does not match a defined image extension
+	//3) First step we extract the file name from the alt tag and remove any file path
+	//4) We match the regex part which matches the vault base path and the file name
+	//5) We get the TFile object from the matched path
+	//6) We read the binary data from the TFile object
+	//7) We create a hash from the binary data
+	//8) We build the ObsidianPicture object and add it to the list
+
+						// File path within the vault
+						//const filePath = normalizePath(fileName);
+						// Check if file exists
+						//const existingFile = this.app.vault.getAbstractFileByPath(filePath);
+						//getAbstractFileByPath was removed in Obsidian v1.8.10
+						//Instead use getFileByPath andgetFolderByPath`
+						//const existingFile = this.app.vault.getFileByPath(filePath);
+/*
+import { TFile, normalizePath } from 'obsidian';
+
+function getTFileByVaultPath(app: App, vaultPath: string): TFile | null {
+  const path = normalizePath(vaultPath);
+  const af = app.vault.getAbstractFileByPath(path);
+  return af instanceof TFile ? af : null;
+}
+*/
+
 	static async buildPictureUploadList(app: App, noteFile: TFile, pictureSavePath: string): Promise<ObsidianPicture[]> {
 		const pictureList: ObsidianPicture[] = [];
 		const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp"];
@@ -1673,9 +1718,14 @@ export class Foundry {
 
 		for (const embed of cache.embeds) {
 			const filePath = noteFile?.path ?? "";
+			debug.log("==Embed to be processed for picture upload:",embed)
+			debug.log("==In file:",filePath)
 
+			debug.log("==Embed resolved to file:",embed.link)
+			debug.log("== in note:",filePath)
 			const embeddedFile = app.metadataCache.getFirstLinkpathDest(embed.link, filePath); //Internal wikiling = embed.link AND the File the embed is in
-
+			
+			debug.log("==Embedded file found:",embeddedFile)
 			if (!embeddedFile?.extension) return pictureList ?? [];
 
 			if (imageExtensions.indexOf("." + embeddedFile?.extension) !== -1) {
@@ -1758,7 +1808,7 @@ export class Foundry {
 	}
 } //Class End
 
-const LINK_UPDATE_CODE = 
+export const LINK_UPDATE_CODE = 
 `
 /**
  * Resolves Obsidian-style links within Foundry Journal entries by mapping Obsidian UUIDs/paths
@@ -1966,7 +2016,7 @@ const svgContent =
   width="24"
   height="24"
   viewBox="0 0 24 24"
-  stroke="black"
+  stroke="white"
   stroke-width="2"
   stroke-linecap="round"
   stroke-linejoin="round"

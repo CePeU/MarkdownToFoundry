@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync, write, writeFileSync } from "fs";
 
 const targetVersion = process.env.npm_package_version;
 
@@ -12,3 +12,12 @@ writeFileSync("manifest.json", JSON.stringify(manifest, null, "\t"));
 let versions = JSON.parse(readFileSync("versions.json", "utf8"));
 versions[targetVersion] = minAppVersion;
 writeFileSync("versions.json", JSON.stringify(versions, null, "\t"));
+
+writeFileSync("src/versionConstant.ts", `export const VERSION_CONSTANTS = {
+    MAJOR: ${targetVersion?.split(".")[0]},
+    MINOR: ${targetVersion?.split(".")[1]},
+    PATCH: ${targetVersion?.split(".")[2]}
+};
+export const VERSION_STRING = \`\${VERSION_CONSTANTS.MAJOR}.\${VERSION_CONSTANTS.MINOR}.\${VERSION_CONSTANTS.PATCH}\`;    
+`);
+console.log(`Bumped version to ${targetVersion} with minAppVersion ${minAppVersion}`);

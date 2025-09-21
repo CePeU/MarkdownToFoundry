@@ -1,6 +1,6 @@
-import { cleanHtml, replacePictureLinks } from "src/html-cleaner";
-import { Foundry, FoundryHtml, generateIdForFile } from "src/foundry";
-
+import { cleanHtml, replacePictureLinks } from "./html-cleaner";
+import { Foundry, FoundryHtml, generateIdForFile } from "./foundry";
+import {VERSION_CONSTANTS } from "./versionConstant";
 import {
 	addIcon,
 	debounce,
@@ -15,10 +15,11 @@ import {
 	normalizePath,
 	FileSystemAdapter,
 } from "obsidian";
-import { writeFileOnWindows, showBrowserNotification, ObsidianPicture } from "src/utils";
+import { writeFileOnWindows, showBrowserNotification, ObsidianPicture,debug } from "./utils";
 import { MarkdownToFoundrySettings, MarkdownToFoundrySettingsTab as MarkdownToFoundrySettingsTab } from "./settings";
 
-export const MARKDOWN_TO_FOUNDRY_ICON = `
+export const MARKDOWN_TO_FOUNDRY_ICON = 
+`
 <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-markdownttofundry">
   <path d="M 10 2 L 13.5 2" />
   <path d="M 10 9 L 10 2" />
@@ -42,8 +43,10 @@ export default class MarkdownToFoundry extends Plugin {
 	private copyInProgressModal: Modal;
 	private copyResult: HTMLElement | undefined;
 	private activeFile: TFile;
+	public debugMode: boolean = false;
 	
 	async onload() {
+		debug.setDebugMode(false); //default is true
 		// add custom icon
 		addIcon(
 			"markdownToFoundry-icon", MARKDOWN_TO_FOUNDRY_ICON
@@ -61,7 +64,9 @@ export default class MarkdownToFoundry extends Plugin {
 		setIcon(rotateDiv, "loader");
 
 		const copyCallback = async () => {
-			console.debug("M2F: Started with the copy and render process of the HTML")
+			
+			debug.log("Started with the copy and render process of the HTML");
+			
 			//Important!
 			//await forceRerender(this.app,this)
 			const view = this.app.workspace.getActiveViewOfType(MarkdownView); // get the active view of the workspace, which is a markdown view
@@ -69,13 +74,13 @@ export default class MarkdownToFoundry extends Plugin {
 				// if the view is not null, we have an active markdown view
 				if (view.editor != null) {
 					// if the editor is not null, we have an active markdown editor
-					this.startCopyProcess(); // start the copy process by creating a new div to store the rendered HTML
+					this.startCopyProcess(settingsTab.activeProfileData); // start the copy process by creating a new div to store the rendered HTML
 					this.renderHtml(view.editor); // render the HTML from the editor content
 				} else {
 					this.copyResult = view.contentEl; // if the editor is null, we have a markdown view without an editor, so we use the content element of the view
 					if (this.hasCopyResult()) {
 						// if we have a copy result, we can copy the HTML to the clipboard
-						this.startCopyProcess(); // start the copy process by creating a new div to store the rendered HTML
+						this.startCopyProcess(settingsTab.activeProfileData); // start the copy process by creating a new div to store the rendered HTML
 						this.exportHtml(settingsTab.activeProfileData); // copy the HTML to the clipboard //settingsTab.settings SETTINGS
 					}
 				}
@@ -191,7 +196,9 @@ export default class MarkdownToFoundry extends Plugin {
 	/** Openes a modal to let the user know that the copy is in progress and triggers the render of the markdown document or selection. */
 	// The renderHtml method is called to render the markdown content to HTML and store it in the copyResult div
 	private renderHtml = async (editor: Editor, settings?: MarkdownToFoundrySettings, fileListToRender?: string[]) => {
-		console.debug("M2F: Entered the render function")
+		
+		debug.log("Entered the render function");
+		
 		// path is needed to resolve relative links in the markdown content
 
 		//lets us grab the active file object the render is based on so we can use it later on during html processing
@@ -207,7 +214,9 @@ export default class MarkdownToFoundry extends Plugin {
 				return editor.getValue(); // if the editor has no selection, we return the whole content of the editor
 			}
 		};
-		console.debug("M2F: MarkdownTo: Copying to clipboard", path);
+		
+		debug.log("MarkdownTo: Copying to clipboard", path);
+		
 		// The result of the render is stored in copyResult by appending the rendered html elements one by one
 		// so the render result is stored on the property the render process can be called several times
 		await MarkdownRenderer.render(this.app, content(), this.copyResult as HTMLElement, path, this); // render the markdown content to HTML and store it in the copyResult div
@@ -229,7 +238,9 @@ component	Component	The parent component to manage the lifecycle of the rendered
 	/** Creates the cleaned html from the rendered HTML and exports it to the clipboard, disk or foundry. */
 	private exportHtml = debounce(
 		async (settings: MarkdownToFoundrySettings) => {
-			console.debug("M2F: Rendered HTML is processed for output")
+			
+			debug.log("Rendered HTML is processed for output")
+			
 			const file = this.activeFile; //get the file object of the active file for batch report it might need to be filled by the collected files
 			const NodeHtml: HTMLElement = this.copyResult as HTMLElement; //maybe necessary for batch export
 			let obsidianPictureList: ObsidianPicture[] = [];
@@ -243,7 +254,9 @@ component	Component	The parent component to manage the lifecycle of the rendered
 
 			// =======FOUNDRY Export INIT ================================================================================================
 			if (settings.exportFoundry && settings.exportDirty === false) {
-				console.debug("M2F: Foundry export has started")
+				
+				debug.log("Foundry export has started")
+				
 				//file might needed to be changed or read from an array because so far it is the file of the active editor!!!
 				if (file) {
 					try {
@@ -297,7 +310,9 @@ component	Component	The parent component to manage the lifecycle of the rendered
 			//Clippboard EXPORT AND HTML cleaning ========================================================================
 
 			if (settings.exportDirty) {
-				console.debug("M2F: Exporting dirty HTML to clipboard");
+				if (settings.isDebugOutput) {
+					debug.log("Exporting dirty HTML to clipboard");
+				}
 				// if the user wants to export the dirty HTML, we just copy the result of the render
 				html = this.copyResult?.innerHTML ?? "";
 				if (settings.exportClipboard) {
@@ -308,7 +323,9 @@ component	Component	The parent component to manage the lifecycle of the rendered
 						.finally(() => this.endCopyProcess());
 				} else { this.endCopyProcess(); } // if the user does not want to export to clipboard, we just end the copy process
 			} else {
-				console.debug("M2F: Exporting cleaned HTML to clipboard");
+				
+				debug.log("Exporting cleaned HTML to clipboard");
+				
 				// if the user wants to export the clean HTML, we need to render and wait for the render to finish
 				this.copyInProgressModal.close();
 
@@ -328,7 +345,9 @@ component	Component	The parent component to manage the lifecycle of the rendered
 
 			// =======FOUNDRY Export PAGES ================================================================================================
 			if (settings.exportFoundry && settings.exportDirty === false && Foundry.clientId !== "") {
-				console.debug("M2F: Exporting HTML to Foundry");
+				
+				debug.log("Exporting HTML to Foundry");
+				
 				//file might needed to be changed or read from an array because so far it is file of the active editor!!!
 				if (foundryHtml.obsidianFileObj) {
 					try {
@@ -368,14 +387,18 @@ component	Component	The parent component to manage the lifecycle of the rendered
 						// Extract a safe error message
 						let message = "Unknown error";
 						if (error instanceof Error) {
-							console.debug("M2F: Error Object Output:", error)
+							
+							debug.log("Error Object Output:", error)
+							
 							message = error.message;
 							//message = String(error)
 						} else {
 							message = String(error);
 						}
 						// Show a notice in Obsidian with the error message
-						console.debug("M2F: Error Object Output:", error)
+						
+						debug.log("Error Object Output:", error)
+						
 						new Notice(`Error: ${message}`, 5000); // 5000 ms = 5 seconds duration
 						showBrowserNotification("Error: ", { body: message });
 					}
@@ -389,7 +412,9 @@ component	Component	The parent component to manage the lifecycle of the rendered
 			// FILE EXPORT START ======================================================================================================================
 			// Start HTML export if file export is selected
 			if (settings.exportFile) {
-				console.debug("M2F: Export to the file system takes place")
+				
+				debug.log("Export to the file system takes place");
+				
 				// Content to save
 				const content = foundryHtml.html;
 
@@ -410,7 +435,7 @@ component	Component	The parent component to manage the lifecycle of the rendered
 				if (platform === "win32" && Schalter) {
 					// Windows specific code}
 					if (settings.htmlExportFilePath !== "") {
-						writeFileOnWindows(settings.htmlExportFilePath, htmlFileName, html)
+						writeFileOnWindows(settings.htmlExportFilePath, htmlFileName, html,settings) //TODO: decide if settings or activeprofiledata is better here
 							.then(() => {
 								new Notice("HTML file created successfully", 3500);
 							})
@@ -442,14 +467,18 @@ component	Component	The parent component to manage the lifecycle of the rendered
 		true /* reset delay if method is called before timer finishes */
 	);
 
-	private startCopyProcess() {
-		console.debug("M2F: Copy Process has started")
+	private startCopyProcess(settings?: MarkdownToFoundrySettings) {
+		
+		debug.log("Copy Process has started");
+		
 		this.copyResult = createDiv();
 		this.copyInProgressModal.open();
 	}
 
-	private endCopyProcess() {
-		console.debug("M2F: Copy Process has stopped")
+	private endCopyProcess(settings?: MarkdownToFoundrySettings) {
+		
+		debug.log("Copy Process has stopped");
+		
 		this.copyResult = undefined;
 		this.copyInProgressModal.close();
 	}

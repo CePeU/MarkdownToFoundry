@@ -1,6 +1,6 @@
 import { FoundryHtmlLinkInformation, FoundryHtml, generateIdForFile, Foundry } from "./foundry";
 import { MarkdownToFoundrySettings } from "./settings";
-import { isEmpty, removeEmptyLines, ObsidianPicture } from "./utils";
+import { isEmpty, removeEmptyLines, ObsidianPicture,debug } from "./utils";
 import { App, TFile, Vault, Platform, normalizePath, parseFrontMatterEntry, FileSystemAdapter } from "obsidian";
 
 /**
@@ -37,6 +37,9 @@ export async function cleanHtml(parent: HTMLElement, settings: MarkdownToFoundry
       // add a property/function for the scriptApi object which goes into the JavaScript execution
       createID: () => {
         return Foundry.generateFoundryID(this.app);
+      },
+      frontMatter: () => {
+        return this.app.metadataCache.getFileCache(sourceFile)?.frontmatter ?? {}
       }
       // expose only what's needed
     };
@@ -52,7 +55,7 @@ export async function cleanHtml(parent: HTMLElement, settings: MarkdownToFoundry
 
 
 function runJavaScript(codeString: string, html: string, api: any): string {
-  console.debug("M2F: JavaScript execution was started")
+  debug.log("JavaScript execution was started")
   try {
     /* creates a function, the function code allways is the last parameter
     The function looks like this 
@@ -77,7 +80,8 @@ export function replacePictureLinks(
   settings: MarkdownToFoundrySettings,
   pictureList: ObsidianPicture[]
 ): string {
-  console.debug("M2F: Picture link replacement was started: [replacePictureLinks]")
+
+  debug.log("Picture link replacement was started: [replacePictureLinks]");
   if (!settings.encodePictures) {
     if (pictureList.length > 0) {
       for (let i = 0; i < pictureList.length; i++) {
@@ -102,7 +106,9 @@ function escapeRegex(string: string): string {
 
 // function to replace strings in the html according to an array of rules
 function replaceInHTMLWithRegex(html: string, settings: MarkdownToFoundrySettings): string {
-  console.debug("M2F: Regex replacements according to rules array started: [replaceInHTMLWithRegex]")
+  
+  debug.log("Regex replacements according to rules array started: [replaceInHTMLWithRegex]");
+  
   if (settings.rulesForRegex) {
     for (let i = 0; i < settings.rulesForRegex.length; i++) {
       const singleRuleSet = settings.rulesForRegex[i];
@@ -121,7 +127,7 @@ function replaceInHTMLWithRegex(html: string, settings: MarkdownToFoundrySetting
 
 //create a valid regex
 function parseRegexPattern(input: string): { regexPattern: string; regexFlags: string } {
-  console.debug("M2F: Parsing regex expression to be a valid regex: [parseRegexPattern]")
+  debug.log("Parsing regex expression to be a valid regex: [parseRegexPattern]")
   const match = input.match(/(.*)\/([gimsuy]*)$/);
   if (!match) throw new Error("Invalid regex input");
   return {
@@ -132,7 +138,9 @@ function parseRegexPattern(input: string): { regexPattern: string; regexFlags: s
 
 //function to modify tags - allows to create tags for callouts and also necessary to work around Foundry bugs in html sanitizing which are not corrected by foundry devs
 function replaceTag(parent: HTMLElement, settings: MarkdownToFoundrySettings) {
-  console.debug("M2F: Replacing HTML tag elements in node modus: [replaceTag]")
+  
+  debug.log("Replacing HTML tag elements in node modus: [replaceTag]");
+  
   if (settings.rulesForTags) {
     for (let i = 0; i < settings.rulesForTags.length; i++) {
       const singleRuleSet = settings.rulesForTags[i];
@@ -175,7 +183,9 @@ function replaceTag(parent: HTMLElement, settings: MarkdownToFoundrySettings) {
 
 //TODO: resolve internal links (potentially) differently if a file export is used
 function resolveInternalLinks(parent: HTMLElement, settings: MarkdownToFoundrySettings, sourceFile?: TFile): FoundryHtmlLinkInformation[] {
-  console.debug("M2F: Resolving of internal Obsidian wikilinks has started: [resolveInternalLinks]")
+  
+  debug.log("Resolving of internal Obsidian wikilinks has started: [resolveInternalLinks]");
+  
   let linkaArray: FoundryHtmlLinkInformation[] = [];
  
   if (settings.internalLinkResolution) {
@@ -267,7 +277,7 @@ function resolveInternalLinks(parent: HTMLElement, settings: MarkdownToFoundrySe
 /** remove all child nodes that don't have any content (removes empty paragraphs left by comments) */
 // TODO: Think about making this more flexible and/or include other tags ? IF necessary
 function removeEmptyContainer(parent: HTMLElement) {
-  console.debug("M2F: Removing of all p and div tags with no innter text: [removeEmptyContainer]")
+  debug.log("Removing of all p and div tags with no innter text: [removeEmptyContainer]")
   parent.querySelectorAll("p, div").forEach(node => {
     if (isEmpty(node.innerHTML)) {
       node.remove();
@@ -277,7 +287,9 @@ function removeEmptyContainer(parent: HTMLElement) {
 
 /** Remove frontmatter header */
 function removeFrontMatter(parent: HTMLElement, settings: MarkdownToFoundrySettings) {
-  console.debug("M2F: Removing frontmatter information: [removeFrontMatter]")
+  
+  debug.log("Removing frontmatter information: [removeFrontMatter]");
+  
   if (settings.removeFrontmatter) {
     const frontmatterNodes = parent.querySelectorAll(".frontmatter, .frontmatter-container");
     frontmatterNodes.forEach(node => node.remove());
@@ -286,7 +298,9 @@ function removeFrontMatter(parent: HTMLElement, settings: MarkdownToFoundrySetti
 
 /** Remove all irrelevant classes of in nodes */
 function removeAttributes(parent: HTMLElement, settings: MarkdownToFoundrySettings) {
-  console.debug("M2F: Removing all attributes and classes - leaving only selected: [removeAttributes]")
+  
+  debug.log("Removing all attributes and classes - leaving only selected: [removeAttributes]");
+  
   const elements = parent.querySelectorAll<HTMLElement>("*"); //select all html elements/nodes
 
   elements.forEach(element => {
@@ -316,7 +330,9 @@ function removeAttributes(parent: HTMLElement, settings: MarkdownToFoundrySettin
 
 /** Convert internal Images to base64 string */
 async function convertImages(parent: HTMLElement, settings: MarkdownToFoundrySettings, sourceFile?: TFile) {
-  console.debug("M2F: Base64 encoding started: [convertImages]")
+  
+  debug.log("Base64 encoding started: [convertImages]");
+  
   if (settings.encodePictures) {
     const images = parent.querySelectorAll('img:not([src^="http"])') as NodeListOf<HTMLImageElement>;
     for (let i = 0; i < images.length; i++) {

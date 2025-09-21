@@ -9,11 +9,18 @@ import {
 	Notice,
 	addIcon,
 } from "obsidian";
-import MarkdownToFoundry from "src/plugin";
-import { isEmpty } from "./utils";
-import { Foundry, apiPost_CreateFoundryMacro } from "./foundry";
+import MarkdownToFoundry from "./plugin";
+import { isEmpty,debug } from "./utils";
+import { Foundry, apiPost_CreateFoundryMacro,LINK_UPDATE_CODE } from "./foundry"; //,LINK_UPDATE_CODE 
+import {VERSION_CONSTANTS, VERSION_STRING} from "./versionConstant";
 
 export interface MarkdownToFoundrySettings {
+	profileVersion:{
+		MAJOR: number,
+		MINOR: number,
+		PATCH: number
+	},
+	isDebugOutput: boolean;
 	attributeList: string[];
 	classList: string[];
 	isActiveProfile: boolean;
@@ -53,6 +60,12 @@ export interface ProfileSettings {
 
 export const DEFAULT_SETTINGS: ProfileSettings = {
 	default: {
+		profileVersion:{
+		MAJOR: VERSION_CONSTANTS.MAJOR,
+		MINOR: VERSION_CONSTANTS.MINOR,
+		PATCH: VERSION_CONSTANTS.PATCH
+		},
+		isDebugOutput: false,
 		attributeList: ["id", "href", "src", "width", "height", "alt", "colspan", "rowspan"],
 		classList: [],
 		isActiveProfile: true,
@@ -85,8 +98,14 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
 		foundryMacroLinkingRun: false,
 		foundryWriteFrontmatter: false,
 	},
-	"Foundry_export": {
-    "attributeList": [
+	Foundry_export: {
+	profileVersion:{
+		MAJOR: VERSION_CONSTANTS.MAJOR,
+		MINOR: VERSION_CONSTANTS.MINOR,
+		PATCH: VERSION_CONSTANTS.PATCH
+		},
+	isDebugOutput: false,
+    attributeList: [
       "alt",
       "colspan",
       "data-callout",
@@ -103,8 +122,8 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
     "classList": [
       "callout"
     ],
-    "isActiveProfile": true,
-    "rulesForTags": [
+    isActiveProfile: true,
+    rulesForTags: [
       [
         "div[data-callout=\"secret\"]",
         "section"
@@ -138,7 +157,7 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
         "p"
       ]
     ],
-    "rulesForRegex": [
+    rulesForRegex: [
       [
         "data-callout-fold=\"\"/gm",
         "open"
@@ -152,7 +171,7 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
         ""
       ],
       [
-        "<section\\s+data-callout=\"secret\"\\s+class=\"callout\"><summary><span>(.*?)<\\/span><\\/summary>/gm",
+        "<section[^>]*data-callout=\"secret\"[^>]*class=\"callout\"[^>]*>\\s*<summary><span>(.*?)<\\/span><\\/summary>/g",
         "<section  class=\"secret\">"
       ],
       [
@@ -160,40 +179,40 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
         ""
       ]
     ],
-    "jsCode": "const newHtml = html.replace(/class=\"secret\"/g, function(match) {\n  const newId = api.createID();  // Called once per match ✅\n  return `class=\"secret\" id=\"secret-${newId}\"`;\n});\nreturn newHtml",
-    "exportDirty": false,
-    "exportFile": false,
-    "exportClipboard": true,
-    "exportFoundry": true,
-    "internalLinkResolution": true,
-    "htmlExportFilePath": "",
-    "encodePictures": false,
-    "removeFrontmatter": true,
-    "foundryApiKey": "",
-    "foundryRelayServer": "https://foundryvtt-rest-api-relay.fly.dev",
-    "assetSaveRuleset": [
+    jsCode: "const newHtml = html.replace(/class=\"secret\"/g, function(match) {\n  const newId = api.createID();  // Called once per match ✅\n  return `class=\"secret\" id=\"secret-${newId}\"`;\n});\nreturn newHtml",
+    exportDirty: false,
+    exportFile: false,
+    exportClipboard: true,
+    exportFoundry: true,
+    internalLinkResolution: true,
+    htmlExportFilePath: "",
+    encodePictures: false,
+    removeFrontmatter: true,
+    foundryApiKey: "",
+    foundryRelayServer: "https://foundryvtt-rest-api-relay.fly.dev",
+    assetSaveRuleset: [
       [
         "",
         ""
       ]
     ],
-    "foundryHeadlessUsed": false,
-    "foundryUser": "Gamemaster",
-    "foundryPW": "",
-    "foundryWorld": "",
-    "foundryClientId": "",
-    "foundryIP": "",
-    "excludeFoldersByregex": "",
-    "footerAndHeader": [
+    foundryHeadlessUsed: false,
+    foundryUser: "Gamemaster",
+    foundryPW: "",
+    foundryWorld: "",
+    foundryClientId: "",
+    foundryIP: "",
+    excludeFoldersByregex: "",
+    footerAndHeader: [
       "",
       ""
     ],
-    "foundrySettingsUsed": false,
-    "foundryFolder": "Obsidian Export",
-    "foundryJournal": "Obsidian",
-    "foundryPicturePath": "assets/pictures",
-    "foundryMacroLinkingRun": true,
-    "foundryWriteFrontmatter": false
+    foundrySettingsUsed: false,
+    foundryFolder: "Obsidian Export",
+    foundryJournal: "Obsidian",
+    foundryPicturePath: "assets/pictures",
+    foundryMacroLinkingRun: true,
+    foundryWriteFrontmatter: false
   }
 };
 
@@ -205,8 +224,9 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 
 	constructor(app: App, plugin: MarkdownToFoundry) {
 		super(app, plugin);
-		this.plugin = plugin;
 		this.loadSettings();
+		this.plugin = plugin;
+		
 		//this._activeProfileData = this._allProfileData['default'];
 	}
 
@@ -253,12 +273,36 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 			this._allProfileData[profileToActivate].isActiveProfile = true;
 			this._allProfileData[currentActiveProfile].isActiveProfile = false;
 		}
-		console.debug("M2F: New active Profile", this.activeProfileName);
+		
+		
+		debug.log("New active Profile", this.activeProfileName);
+		debug.setDebugMode(this.activeProfileData.isDebugOutput);
+		
 	}
 
 	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
+		containerEl.createEl("h1", { text: `MarkdownToFoundry - v${VERSION_STRING}`});
+		new Setting(this.containerEl)
+			.setName("Enable debug output")
+			.setDesc("Whether debug output should be enabled.")
+			.addToggle(toggle => {
+				toggle.setValue(this.activeProfileData?.isDebugOutput ?? true);
+				toggle.onChange(async value => {
+					if (value) {
+						this.activeProfileData.isDebugOutput = true;
+						debug.setDebugMode(true);
+						this.save();
+						this.display();
+					} else {
+						this.activeProfileData.isDebugOutput = false;
+						debug.setDebugMode(false);
+						this.save();
+						this.display();
+					}
+				});
+			});
 		//profile dropdown for profiles selection
 		new Setting(containerEl).setHeading().setName("Profile management");
 		new Setting(containerEl)
@@ -307,6 +351,12 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 					if (!this.activeProfileData.exportDirty && text.inputEl.value !== "") {
 						// create a new cloned profile with the name from the input field
 						this._allProfileData[text.inputEl.value] = {
+							profileVersion:{
+								MAJOR: this.activeProfileData.profileVersion.MAJOR,
+								MINOR: this.activeProfileData.profileVersion.MINOR,
+								PATCH: this.activeProfileData.profileVersion.PATCH
+							},
+							isDebugOutput: this.activeProfileData.isDebugOutput,
 							attributeList: Array.from(this.activeProfileData.attributeList),
 							classList: Array.from(this.activeProfileData.classList),
 							isActiveProfile: false,
@@ -801,22 +851,67 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 								}
 							})
 					);
-				//Foundry linking macro
+				//SECTION foundry linking export settings
+				new Setting(containerEl).setHeading().setName("Foundry journal relinking export settings");
+
+				//Foundry linking macro to clipboard
+				new Setting(containerEl)
+					.setName("Copy Foundry VTT journal linking macro to clipboard")
+					.setDesc(
+						"This will copy the journal linking macro to your clipboard only."
+					)
+					.addButton(button =>
+						button
+							.setIcon("clipboard-copy")
+							.setTooltip("Copies the macro code for journal linking to clipboard")
+							.onClick(async () => {
+								
+								debug.log("Macro copy to clipboard started");
+								
+							navigator.clipboard
+								.writeText(LINK_UPDATE_CODE) //
+								.then(() => new Notice("Macro copied to the clipboard", 3500))
+								.catch(() => new Notice("Couldn't copy macro to the clipboard", 3500))
+							})
+					);
+
+				//Foundry linking macro by upload
 				new Setting(containerEl)
 					.setName("Install Foundry VTT journal linking macro")
 					.setDesc(
-						"This will install a linking macro into your Foundry session and also copy the macro to your clipboard for manual install."
+						"This will install a linking macro into your active Foundry session."
 					)
 					.addButton(button =>
 						button
 							.setIcon("markdownToFoundry-icon")
 							.setTooltip("Installs the macro code for journal linking in Foundry")
 							.onClick(async () => {
-							console.debug("M2F: Macro installation started");
+								
+								debug.log("Macro installation started");
+								
 								await Foundry.init(this.app, this.activeProfileData)
 								const response = await apiPost_CreateFoundryMacro(Foundry.foundryApiKey, Foundry.clientId, Foundry.foundryRelayServer)
 							})
 					);
+				// Automatic journal linking after each export
+				new Setting(this.containerEl)
+					.setName("Foundry VTT journal linking after every export")
+					.setDesc("This will run a journal linking run after each export in the connected Foundry instance if the toggle is set")
+					.addToggle(toggle => {
+						toggle.setValue(this.activeProfileData.foundryMacroLinkingRun);
+						toggle.onChange(async value => {
+							if (value) {
+								this.activeProfileData.foundryMacroLinkingRun = true;
+								this.save();
+								this.display();
+							} else {
+								this.activeProfileData.foundryMacroLinkingRun = false;
+								this.save();
+								this.display();
+							}
+						});
+					});
+
 				//SECTION headless login
 				new Setting(containerEl).setHeading().setName("Foundry headless login settings");
 				//headless login toggle
@@ -895,24 +990,7 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 				}
 				//SECTION foundry standard export settings
 				new Setting(containerEl).setHeading().setName("Foundry standard export settings");
-				// standard settings journal linking
-				new Setting(this.containerEl)
-					.setName("Journal linking after every export")
-					.setDesc("This will run a journal linking run after each export in the connected Foundry instance if the toggle is set")
-					.addToggle(toggle => {
-						toggle.setValue(this.activeProfileData.foundryMacroLinkingRun);
-						toggle.onChange(async value => {
-							if (value) {
-								this.activeProfileData.foundryMacroLinkingRun = true;
-								this.save();
-								this.display();
-							} else {
-								this.activeProfileData.foundryMacroLinkingRun = false;
-								this.save();
-								this.display();
-							}
-						});
-					});
+
 				//standard export settings toggle
 				new Setting(this.containerEl)
 					.setName("Set Foundry standard export settings")
@@ -1127,9 +1205,95 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 	 * Load settings on start-up.
 	 */
 	private async loadSettings() {
-		this._allProfileData = Object.assign({}, DEFAULT_SETTINGS, await this.plugin.loadData());
-		this.activateProfile = "";
-		await this.plugin.saveData(this._allProfileData);
+		const originalDataJson = await this.plugin.loadData() ?? "{}";
+		debug.log("Loaded profile data: ", originalDataJson);
+		if (originalDataJson === "{}" || Object.keys(originalDataJson).length === 0) {
+			this._allProfileData = DEFAULT_SETTINGS;
+			debug.log("No previous profile settings found, loading defaults.",this._allProfileData);
+		} else {
+			const major = (originalDataJson["default"]?.profileVersion?.MAJOR ?? 0);
+			const minor = (originalDataJson["default"]?.profileVersion?.MINOR ?? 0);
+			const patch = (originalDataJson["default"]?.profileVersion?.PATCH ?? 0);
+
+			if (major < VERSION_CONSTANTS.MAJOR || minor < VERSION_CONSTANTS.MINOR || patch < VERSION_CONSTANTS.PATCH) {		
+				debug.log("Old profile settings found, migrating to new version.");
+				this._allProfileData = this.migrateProfile(originalDataJson);
+			} else {
+				this._allProfileData = originalDataJson;
+				debug.log("Profile settings found, using current settings.",this._allProfileData);
+				
+		}
+		
+	}
+	this.activateProfile = "";
+	await this.plugin.saveData(this._allProfileData);
+}
+
+	/**
+	 * Migrates profiles if a new version of the plugin has been released.
+	 */
+	private migrateProfile(oldProfileCollection: any){
+		let newProfileCollection: ProfileSettings = {};
+		let profileNameList: string[] = Object.keys(oldProfileCollection)
+		let activeProfileNameCollection: string[] = []
+		for (const profileName of profileNameList) {
+			if (oldProfileCollection[profileName]?.isActiveProfile) {
+				if (profileName !== "default") {
+					activeProfileNameCollection.push(profileName)
+				}
+			}
+			// For each profile copy over the old settings and add new settings with default values
+			// Also update the version number
+			// If old setting does not exist use default value
+			// Use optional chaining and nullish coalescing to handle missing properties
+			newProfileCollection[profileName] = {
+							profileVersion:{
+								MAJOR: VERSION_CONSTANTS.MAJOR,
+								MINOR: VERSION_CONSTANTS.MINOR,
+								PATCH: VERSION_CONSTANTS.PATCH
+							},
+							isDebugOutput: oldProfileCollection[profileName]?.isDebugOutput ?? DEFAULT_SETTINGS.default.isDebugOutput,
+							attributeList: Array.from(oldProfileCollection[profileName]?.attributeList ?? DEFAULT_SETTINGS.default.attributeList),
+							classList: Array.from(oldProfileCollection[profileName]?.classList ?? DEFAULT_SETTINGS.default.classList),
+							isActiveProfile: false, //We only want one active profile at a time and will determine the correct one later
+							rulesForTags: Array.from(oldProfileCollection[profileName]?.rulesForTags ?? DEFAULT_SETTINGS.default.rulesForTags),
+							rulesForRegex: Array.from(oldProfileCollection[profileName]?.rulesForRegex ?? DEFAULT_SETTINGS.default.rulesForRegex),
+							jsCode: oldProfileCollection[profileName]?.jsCode ?? DEFAULT_SETTINGS.default.jsCode,
+							exportDirty: oldProfileCollection[profileName]?.exportDirty ?? DEFAULT_SETTINGS.default.exportDirty,
+							exportFile: oldProfileCollection[profileName]?.exportFile ?? DEFAULT_SETTINGS.default.exportFile,
+							exportClipboard: oldProfileCollection[profileName]?.exportClipboard ?? DEFAULT_SETTINGS.default.exportClipboard,
+							exportFoundry: oldProfileCollection[profileName]?.exportFoundry ?? DEFAULT_SETTINGS.default.exportFoundry,
+							internalLinkResolution: oldProfileCollection[profileName]?.internalLinkResolution ?? DEFAULT_SETTINGS.default.internalLinkResolution,
+							htmlExportFilePath: oldProfileCollection[profileName]?.htmlExportFilePath ?? DEFAULT_SETTINGS.default.htmlExportFilePath,
+							encodePictures: oldProfileCollection[profileName]?.encodePictures ?? DEFAULT_SETTINGS.default.encodePictures,
+							removeFrontmatter: oldProfileCollection[profileName]?.removeFrontmatter ?? DEFAULT_SETTINGS.default.removeFrontmatter,
+							foundryApiKey: oldProfileCollection[profileName]?.foundryApiKey ?? DEFAULT_SETTINGS.default.foundryApiKey,
+							foundryRelayServer: oldProfileCollection[profileName]?.foundryRelayServer ?? DEFAULT_SETTINGS.default.foundryRelayServer,
+							assetSaveRuleset: Array.from(oldProfileCollection[profileName]?.assetSaveRuleset ?? DEFAULT_SETTINGS.default.assetSaveRuleset),
+							foundryHeadlessUsed: oldProfileCollection[profileName]?.foundryHeadlessUsed ?? DEFAULT_SETTINGS.default.foundryHeadlessUsed,
+							foundryUser: oldProfileCollection[profileName]?.foundryUser ?? DEFAULT_SETTINGS.default.foundryUser,
+							foundryPW: oldProfileCollection[profileName]?.foundryPW ?? DEFAULT_SETTINGS.default.foundryPW,
+							foundryWorld: oldProfileCollection[profileName]?.foundryWorld ?? DEFAULT_SETTINGS.default.foundryWorld,
+							foundryClientId: oldProfileCollection[profileName]?.foundryClientId ?? DEFAULT_SETTINGS.default.foundryClientId,
+							foundryIP: oldProfileCollection[profileName]?.foundryIP ?? DEFAULT_SETTINGS.default.foundryIP,
+							excludeFoldersByregex: oldProfileCollection[profileName]?.excludeFoldersByregex ?? DEFAULT_SETTINGS.default.excludeFoldersByregex,
+							footerAndHeader: [oldProfileCollection[profileName]?.footerAndHeader[0] ?? DEFAULT_SETTINGS.default.footerAndHeader[0], oldProfileCollection[profileName]?.footerAndHeader[1] ?? DEFAULT_SETTINGS.default.footerAndHeader[1]],
+							foundrySettingsUsed: oldProfileCollection[profileName]?.foundrySettingsUsed ?? DEFAULT_SETTINGS.default.foundrySettingsUsed,
+							foundryFolder: oldProfileCollection[profileName]?.foundryFolder ?? DEFAULT_SETTINGS.default.foundryFolder,
+							foundryJournal: oldProfileCollection[profileName]?.foundryJournal ?? DEFAULT_SETTINGS.default.foundryJournal,
+							foundryPicturePath: oldProfileCollection[profileName]?.foundryPicturePath ?? DEFAULT_SETTINGS.default.foundryPicturePath,
+							foundryMacroLinkingRun: oldProfileCollection[profileName]?.foundryMacroLinkingRun ?? DEFAULT_SETTINGS.default.foundryMacroLinkingRun,
+							foundryWriteFrontmatter: oldProfileCollection[profileName]?.foundryWriteFrontmatter ?? DEFAULT_SETTINGS.default.foundryWriteFrontmatter,
+						};
+				}
+				debug.log("Migration completed.Migrated to new profile settings: ",newProfileCollection);
+				//if after migration there is more than one active profile we will default to the default profile because we do not know which is the desired correct one
+				if (activeProfileNameCollection.length !== 1){
+					newProfileCollection["default"].isActiveProfile = true;
+				} else {
+					newProfileCollection[activeProfileNameCollection[0]].isActiveProfile = true;
+				}
+				return newProfileCollection;
 	}
 
 	/**

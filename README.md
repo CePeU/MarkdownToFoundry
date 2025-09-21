@@ -221,7 +221,10 @@ Input a new name and the currently active profile will be cloned.
 - **Default**: Enabled.
 - **Toggle**: Enable or disable this feature.
 
-You can define if a copy of the overworked HTML is pasted to the clipboard or not.
+You can define if a copy of the overworked HTML is pasted to the clipboard or not.   
+This is especially helpfull if you are developing a new export profile as you can see what will
+be delivered to Foundry VTT. Also this allows for copy and paste into other applications like
+for example Bookstack.
 
 ### File Export
 - **Description**: Export the HTML to a file.
@@ -277,14 +280,53 @@ You can specify which classes will NOT be cleaned from the HTML (see step 6)
 
 You can specify which tags are replaced or changed and what rule to use. Also the order of the rules applied
 is set. The plugin uses query selector syntax.   
-(TODO: Add examples)
+
+#### Example:
+An Obsidian callout of this type ">[!secret]+ Some Secret GM Stuff" needs to be made into a secret in Foundry VTT.   
+The dirty HTML ouput is somethink like this:   
+`<div ... data-callout="secret"...> ... </div>`   
+For Foundry VTT we need a "section" tag instead of a div tag. So we change the tag.  
+
+The rule fields are filled with:   
+Field1: div[data-callout="secret"]     
+Field2: secret   
+
+We use the query selector div[data-callout="secret"] which will trigger on every div with an attribute data-callout="secret"
+and change each div which matches to a "section" tag.   
+The output result will be something like this:   
+`<section ... data-callout="secret"...> ... </section>`    
+
+Keep in mind we only changed the tag! The attributes remain!
 
 ### Regex Replacement Rules
 - **Description**: Add regex rules to modify the HTML during export.
 - **Example**: Use regex to replace specific patterns in the HTML.
 
 You can specify what regex rules are applied and in which order.  
-(TODO: Add examples)
+
+#### Example:
+Remember that our tag has now been changed to a section tag but the attributes and classes remain?   
+Some other tags have also changed during the tag replacement according to the rules set there.   
+We no have an output like this:   
+`<section ... data-callout="secret"...class="callout"> <summary><span> Some Secret GM Stuff</span></summary>...</section>`    
+This output would be a nice foldable details structure if not for the section tags.   
+In fact this is how a callout which is not of type secret is exported.   
+It would look like this:   
+`<details ... data-callout="secret"...class="callout"> <summary><span> Some Secret GM Stuff</span></summary>...</details>`   
+
+But for our usecase we need a section with a class="secret" and an id with a random uuid conforming to Foundry requirements.   
+It would look like this:   
+`<section class="secret" id="xxxxxxxxxxxx"> Secret Text here </section>`   
+
+So the next step is to grab the correct HTML tag and classes and rewrite them. This is allready done as   
+a string operation on the HTML text and not as a node parsing. So we input the following Regex expression:   
+
+Field1:`<section[^>]*data-callout="secret"[^>]*class="callout"[^>]*>\s*<summary><span>(.*?)<\/span><\/summary>/g`
+and the desired replacement   
+Field2: `<section  class="secret">`   
+
+The result will be something like this:   
+`<section  class="secret"> Your secret text </section>section>`   
 
 ### Javascript Replacements
 - **Description**: Add custom JavaScript functions to modify the HTML during export.
@@ -294,15 +336,21 @@ You can write Javascript code to manipulate the HTML. The HTML is supplied as a 
 For Foundry export a function to generate a foundry compliant ID (api.createID) is also exposed. You need to end your
 function with "return 'variable holding the html string' " to return the modified HTML.
 
+#### Exposed functions:
+- api.createId():    generates a 16 character long random ID that can be used as a identifier for Foundry (secrets for example)
+- api.frontMatter(): exposes the frontmatter of the current note which is processed during HTML cleaning
+
 #### Example:  
 (which will replace all exported classes="secret" which are my callouts for GM stuff with the "secret" class of Foundry and give it an id)
 
 const newHtml = html.replace(/class="secret"/g, function(match) {  
   const newId = api.createID();  
-  return `class="secret" id="secret-${newId}"`;  
+  return \`class="secret" id="secret-${newId}"\`;  
 });  
 return newHtml  
 
+This will replace als classes="secret" texts with classes="secret" id="xxxxxxxxx" and generate the desired HTML:   
+`<section  class="secret" id="xxxxxxxxxx"> Your secret text </section>section>`  
 ***
 
 ## Detailed Export Rules
@@ -313,7 +361,7 @@ return newHtml
   - Add or edit header and footer content.
 
 You can add any text you like as header and footer to the output html text. Make sure it makes sense!
-(For Foundry you thus can wrap the whole export in a div with a special class and bind css to that)    
+(For Foundry you thus can wrap the whole export in a div with a special class and bind your css to that)    
 
 ### Wikilink Resolution
 - **Description**: Resolve internal Obsidian wikilinks and export them with the Obsidian vault path.
@@ -413,11 +461,20 @@ After some time even an active Foundry instance will drop the connection to the 
 This means the best and safest way to get your session ID is to log in to your Foundry instance(s) and then press
 this button to get your session ID(s). You then can select the desired one with the dropdown.
 
+***
+
+## Foundry journal relinking export settings
+
+### Copy Foundry VTT journal linking macro to clipboard
+- **Description**: This will copy the journal linking macro to your clipboard only.
+- **Actions**:
+  - Copies macro to clipboard.
+
+
 ### Install Foundry VTT Journal Linking Macro
 - **Description**: Install the linking macro to your Foundry session.
 - **Actions**:
-  - Install the macro.
-  - (planned: also copy the macro to the clipboard.)
+  - Uploads and installs the macro in Foundry.
 
 You need to have an active session to install the macro. Ideally you are logged in! 
 By pressing this button a connection is established to your active foundry session and a relinking macro is installed. 
@@ -425,6 +482,15 @@ The macro will allow you to relink imported Obsidian journals. Any journals/page
 Just import your next journal/page and use the macro to link both journals/pages.
 
 (Example how this works and what advantages an Obsidian UUID has)
+
+
+### Journal Linking After Every Export
+- **Description**: Automatically run a journal linking process after each export.
+- **Default**: Disabled.
+- **Toggle**: Enable or disable this feature.
+
+Instead of using a macro you can let the plugin execute code on your Foundry instance to relink journals
+after each import.
 
 ***
 
@@ -475,14 +541,6 @@ will overwrite standard settings. If no settings are found the plugin will defau
 > DO: assets/pictures    
 > DO NOT DO!!: /assets/pictures or assets/pictures/  
 
-### Journal Linking After Every Export
-- **Description**: Automatically run a journal linking process after each export.
-- **Default**: Disabled.
-- **Toggle**: Enable or disable this feature.
-
-Instead of using a macro you can let the plugin execute code on your Foundry instance to relink journals
-after each import.
-
 ### Set Foundry standard export settings
 - **Description**: Allows to set standard export settings for Foundry export
 - Default: Disabled
@@ -505,16 +563,32 @@ after each import.
 - **Toggle**: Enable or disable this feature.
 
 This will write information about your exported note to the Obsidian note frontmatter. 
-It also will give your obsidian note an UUID which can be used by the plugin to find the Obsidian note and the corresponding Foundry note. 
+It also will give your obsidian note an UUID which can be used by the plugin to find the Obsidian note and the corresponding Foundry note
+regardless if the Obsidian note has been moved.
+
+#### How this works:
+The plugin exports additional meta information with your export (Foundry flags). Each page/note will receive informations about
+where it comes from. The unique information in obsidian is the file location. No location can hold two notes of the same name. 
+As long as name or location do not change the note/page can be uniquely identified and thus linked to other obsidian notes which have been exported.
+If your note changes name or file location it becomes a "new" note. If that is not desired you can write frontmatter information which
+will create a (statistically) unique Obsidian UUID, store it in your note as frontmatter and export it to foundry as a unique identifier.
+During relinking of notes the plugin will relink based on Obsidian UUID first and then based on name and file location.
 
 VTT_xxx frontmatter settings are foundry specific information.
 The plugin will try to find the correct note for relinking but using an UUID should make updates, and relinking more stable.
 Be aware that changing the frontmatter after your first import (like for example changing the folder) will reimport your
-note as a NEW entry in Foundry and set a new VTT_UUID.
-You will then have two Journals with the same obsidian UUID in Foundry. If a relinking takes place any not yet relinked note linking
+note as a NEW entry in Foundry and set a new Foundry VTT_UUID.
+You will then have two Journals with the same Obsidian UUID in Foundry. If a relinking takes place any not yet relinked note linking
 to those two notes will be a randomly linked to the first (internally) found note with this obsidian UUID. So you need to do a delete
 before a relink run.
 (planned: way to relink such already linked notes to the correct remaining note if only one remains after deleting the unwanted note)
+
+**To make it clear:**
+The plugin does NOT search Foundry, checks if an Obsidian note with an Obsidian UUID exists allready and does adjustments to update the Foundry note
+according to these informations! The source of truth is Obsidian! Folders and Journal destinations AND the name of the Note determine if a
+note will be exported or updated. Of course this also determines the destination where it will be created/updated in Foundry.
+So far the Obsidian UUID is for relinking notes correctly even if the location and name of the note in Foundry change. This can thus still
+lead to two Foundry pages having the same Obsidian UUID if they are exported twice to different locations in Foundry (Folder/Journal)
 
 ***
 ## API Documentation

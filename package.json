@@ -7,7 +7,9 @@
     "test": "node esbuild.config.mjs test",
     "posttest": "cp ma*.j* styles.css data.json /opt/Obsidian/ObsidianDev/DSAObsidianDev/.obsidian/plugins/markdowntofoundry && chown -R nobody:sambashare /opt/Obsidian/ObsidianDev/DSAObsidianDev/.obsidian/plugins/markdowntofoundry/*.*",
     "win": "node esbuild.config.mjs test",
-    "postwin": "copy ma*.j* \"E:\\Projekte\\Obsidian Vault\\DSA Kampagne Obsidian\\.obsidian\\plugins\\markdowntofoundry\" && copy styles.css \"E:\\Projekte\\Obsidian Vault\\DSA Kampagne Obsidian\\.obsidian\\plugins\\markdowntofoundry\" && copy data.json \"E:\\Projekte\\Obsidian Vault\\DSA Kampagne Obsidian\\.obsidian\\plugins\\markdowntofoundry\"",
+    "postwin": "copy ma*.j* \"E:\\Projekte\\Obsidian Vault\\DEV_B OLD DSA Kampagne\\.obsidian\\plugins\\markdowntofoundry\" && copy styles.css \"E:\\Projekte\\Obsidian Vault\\DEV_B OLD DSA Kampagne\\.obsidian\\plugins\\markdowntofoundry\" && copy data.json \"E:\\Projekte\\Obsidian Vault\\DEV_B OLD DSA Kampagne\\.obsidian\\plugins\\markdowntofoundry\"",
+    "windev": "node esbuild.config.mjs test",
+    "postwindev": "copy ma*.j* \"F:\\Code_Projekts\\Obsidian Vault\\DEV_A DSA Kampagne\\.obsidian\\plugins\\markdowntofoundry\" && copy styles.css \"F:\\Code_Projekts\\Obsidian Vault\\DEV_A DSA Kampagne\\.obsidian\\plugins\\markdowntofoundry\" && copy data.json \"F:\\Code_Projekts\\Obsidian Vault\\DEV_A DSA Kampagne\\.obsidian\\plugins\\markdowntofoundry\"",
     "dev": "node esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
     "version": "node version-bump.mjs && git add manifest.json versions.json"
