@@ -594,3 +594,6 @@ lead to two Foundry pages having the same Obsidian UUID if they are exported twi
 ## API Documentation
 
 - Obsidian: [https://github.com/obsidianmd/obsidian-api](https://github.com/obsidianmd/obsidian-api)
+
+
+
