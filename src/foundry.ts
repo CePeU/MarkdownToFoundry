@@ -10,6 +10,7 @@ import {
 	RequestUrlParam,
 	TFile,
 	Vault,
+	normalizePath,
 	FileSystemAdapter,
 	Notice,
 } from "obsidian";
@@ -1640,12 +1641,15 @@ export class Foundry {
 				}
 			debug.log("apiPost_ListOfFiles response data: ",response ?? "No data could be retrieved")
 			
+				//show notification about upload result
+				const resultStatus = response?.json?.success ? "(Success)" : "(Failed)";
 				const responseMessage =
-					Foundry.ObsidianPictureCollection[0].ObsidianPictureName +
+					Foundry.ObsidianPictureCollection[0].ObsidianPictureName +					
+					"==>" +
+					response?.json?.path +
 					" " +
-					response?.json?.message +
-					" to " +
-					response?.json?.path;
+					resultStatus
+					;
 
 				showBrowserNotification("File upload", { body: responseMessage });
 			}
@@ -1704,8 +1708,136 @@ function getTFileByVaultPath(app: App, vaultPath: string): TFile | null {
   return af instanceof TFile ? af : null;
 }
 */
+static async buildPictureUploadList(nodeHtml:HTMLElement,app: App, noteFile: TFile, pictureSavePath: string): Promise<ObsidianPicture[]> {
+	debug.log("buildPictureUploadList function started");
+	const pictureList: ObsidianPicture[] = [];
+	const imageExtensions = ["jpg", "jpeg", "gif", "bmp", "png", "svg", "webp"]; //".png",
+	const bigIntNumber = BigInt(987654321);
+	if (!noteFile || !nodeHtml) return pictureList ?? [];
+	//Collect alls Links which are found in the html node list
+	//Collect all <img> tags which do NOT start with http or https
+	// then get the src attribute and use it to find the TFile object in the vault
+	// then read the binary data from the TFile object
+	// then create a hash from the binary data
+	// then build the ObsidianPicture object and add it to the list
+	
+	//const imageLinkList = nodeHtml.querySelectorAll('img:not([src^="http"], [src^="https"], [src^="data:"], [src^="blob:"])') as NodeListOf<HTMLImageElement>; //List of relevant tags
+	
+	const imageLinkList = nodeHtml.querySelectorAll('img[src^="app://"], img:not([src*=":"])') as NodeListOf<HTMLImageElement> //or selecctor if app:// or no : at all
+	debug.log("Found the following imageLinkList:", imageLinkList);
+	if (imageLinkList.length === 0) return pictureList ?? []; //return if no images found
 
-	static async buildPictureUploadList(app: App, noteFile: TFile, pictureSavePath: string): Promise<ObsidianPicture[]> {
+	const adapter = app.vault.adapter;
+	let obsidianNoteBasePath = "";
+	let obsidianNoteFilePath = "";
+	let obsidianNoteAbsolutePath = "";
+	let obsidianPictureAbsolutePath = "";
+		
+	//TODO:We know we have a FileSystemAdapter - but only on Desktop - on mobile it is different!
+	//So we need to check if the adapter is of type FileSystemAdapter
+	//If it is not we cannot get the base path and file path - so we cannot proceed
+	//If we have a mobile adapter we need to use vault.getResourcePath(myFile) to get the absolute path
+
+	//We also know we have a note so we also know we have a file path
+	//We need the base path to get the relativepath from the src attribute
+	//Also the image src is relative to the vault base path
+	
+	//Let us fill the note file information as we allready have them
+	if (adapter instanceof FileSystemAdapter) {
+		obsidianNoteBasePath = adapter?.getBasePath() ?? "";
+		obsidianNoteFilePath = adapter?.getFilePath(noteFile.path) ?? "";
+		obsidianNoteAbsolutePath = adapter?.getFullPath(noteFile.path) ?? "";
+		}
+
+	// absolutePath is the full system path, e.g., "C:/Users/YourName/ObsidianVault/folder/note.md"
+	// for mobile devices use const absolutePath = vault.getResourcePath(myFile); in that case adaper is not of type FileSystemAdapter
+	
+	//Let us build the information from the list of links we have collected
+	for (let i = 0; i < imageLinkList.length; i++) {
+		const imageNode = imageLinkList[i];
+		const imgSrc = imageNode?.src ?? "";
+		//const imgAlt = imageNode?.alt ?? ""; //probably not needed anymore but can give the title of the picture
+		if (!imgSrc) continue;	//skip if no src exists
+		if (imgSrc.startsWith("http") || imgSrc.startsWith("https")) continue; //skip if src is a URL - but this should be already filtered by the selector
+
+//FIXME: The Regex needs to be smarter to fetch everything between base path and last questionmark. Linux allows for questionmarks in filenames and maybe also in paths
+// Remove the app protocol and query parameters
+const cleanPath = imgSrc.split('?')[0].replace(/^app:\/\/[0-9a-f]+/, '');
+//debug.log('Cleaned picture path:', cleanPath);
+
+// Normalize the path - makes sure to remove redundant slashes and backslashes
+const normalizedPath = normalizePath(cleanPath);
+//debug.log('Normalized picture path:', normalizedPath);
+
+//TODO: Check if only URI paths can and should be used (for mobile and in general for special characters?)
+//The html has an uri path so we need to return in to a non uri
+const cleanedUriPath = decodeURIComponent(normalizedPath);
+//debug.log('Decoded URI path:', cleanedUriPath);
+
+// Normalize the obsidianNoteBasePath - makes sure to remove redundant slashes and backslashes
+const normalizedBasePath = normalizePath(obsidianNoteBasePath);
+//debug.log('Normalized base path:', normalizedBasePath);
+
+// Extract relative path with a regex
+const relativePath = cleanedUriPath.replace(normalizedBasePath, '').replace(/^[\\/]/, '');
+//debug.log('Relative path:', relativePath);
+
+// Get TFile object
+const noteFilePath = noteFile?.path ?? "";
+const pictureFile = this.app.metadataCache.getFirstLinkpathDest(
+	relativePath,noteFilePath,
+	);
+if (!pictureFile) {
+	console.log('No TFile found for path:', relativePath);
+	continue; //skip if no pictureFile found
+}
+debug.log('Extracted pictureFile path:', relativePath);
+debug.log('Picture TFile object:', pictureFile);
+debug.log('Picture file extension:', pictureFile?.extension);
+
+// Check if the pictureFile has a valid image extension
+const fileExtension = imageExtensions.find(ext => pictureFile?.extension.toLowerCase().endsWith(ext));
+
+if (!fileExtension) {
+	console.log('Skipping pictureFile due to invalid extension');
+	continue; //skip if no valid pictureFile extension is found
+}
+if (adapter instanceof FileSystemAdapter) {
+		obsidianPictureAbsolutePath = adapter?.getFullPath(pictureFile.path) ?? "";
+	}
+				const binaryFile = await app.vault.readBinary(pictureFile); // read binary data
+				const binaryUint8Array = new Uint8Array(binaryFile);
+
+				const { h32, h32ToString, h32Raw, create32, h64, h64ToString, h64Raw, create64 } = await xxhash();
+
+				const pictureHash = h64Raw(binaryUint8Array, bigIntNumber).toString(16).padStart(16, "0");
+
+			const obsidianPicture: ObsidianPicture = {
+					ObsidianId: obsidianNoteAbsolutePath,
+					ObsidianFilePath: noteFile?.path ?? "",
+					ObsidianFileName: noteFile?.name ?? "",
+					//ObsidianFileObj:noteFile, //for now only for debug purposes
+
+					ObsidianPictureId: obsidianPictureAbsolutePath,
+					ObsidianPicturePath: pictureFile?.path ?? "",
+					ObsidianPictureName: pictureFile?.name ?? "",
+					ObsidianPictureFileObj: pictureFile, // for now only for debug purposes
+
+					ObsidianPictureExtension: pictureFile?.extension ?? "",
+					ObsidianPictureHash: pictureHash,
+					ObsidianPictureHashName: pictureFile?.basename + "_" + pictureHash + "." + pictureFile?.extension,
+					ObsidianPictureModificationTime: pictureFile?.stat?.mtime ?? 0,
+					ObsidianPictureURI: pictureFile.vault.getResourcePath(pictureFile) ?? "",
+					FoundryPictureHashPath: pictureSavePath + "/" + pictureFile?.basename + "_" + pictureHash + "." + pictureFile?.extension,
+					FoundryPictureUploadPath: pictureSavePath,
+				};
+				pictureList.push(obsidianPicture);				
+}
+	return pictureList ?? [];
+}
+
+/*
+static async buildPictureUploadList_depracated(app: App, noteFile: TFile, pictureSavePath: string): Promise<ObsidianPicture[]> {
 		const pictureList: ObsidianPicture[] = [];
 		const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp"];
 		const bigIntNumber = BigInt(987654321);
@@ -1739,14 +1871,14 @@ function getTFileByVaultPath(app: App, vaultPath: string): TFile | null {
 				// let pictureHash = create64().update(binaryUint8Array).digest() // this should also work if one splits the array
 				// https://github.com/jungomi/xxhash-wasm
 
-				/*
-						let FrontMatterPicturePath = "";
-						if (Foundry.settings.isFoundrySettings){
+				
+						//let FrontMatterPicturePath = "";
+						//if (Foundry.settings.isFoundrySettings){
 							// 'file' is a TFile object representing the note
-							await Foundry.app.fileManager.processFrontMatter(noteFile, (frontmatter) => {                               
-								FrontMatterPicturePath  = frontmatter['FoundryPicturePath'] ?? (Foundry.settings.foundryPicturePath || "//assets/pictures");
-								});
-							}   */
+						//	await Foundry.app.fileManager.processFrontMatter(noteFile, (frontmatter) => {                               
+						//		FrontMatterPicturePath  = frontmatter['FoundryPicturePath'] ?? (Foundry.settings.foundryPicturePath || "//assets/pictures");
+						//		});
+						//	}  
 				const adapter = app.vault.adapter;
 				let obsidianNoteBasePath = "";
 				let obsidianNoteFilePath = "";
@@ -1790,7 +1922,7 @@ function getTFileByVaultPath(app: App, vaultPath: string): TFile | null {
 			}
 		}
 		return pictureList ?? [];
-	}
+	}*/
 
 	// function to build a set out of all frontmatter UUIDs in Obsidian
 	static fetchFrontmatterUUIDs(app: App): Map<string, string> {

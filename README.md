@@ -181,6 +181,21 @@ Up to this point a HTML node view was manipulated! After these steps an HTML str
 > There is also a functionality to let the plugin login headless into a selected foundry instance but it is much slower and not well tested yet.
 
 ***
+# MarkdownToFoundry - v.X.y.z
+
+Patches/Bugfixes are numbered by incrementing z.    
+Minor changes/updates which can break your setup are numbered by incrementing y.    
+Major changes which probably WILL break your setup or give major improvements are numbered by incrementing X.    
+
+### Enable debug output
+
+- **Description**: Enables or disables debug output.
+- **Actions**:
+  - Switch between enabling debug output or not.
+
+  Debug output can be seen if you press ctrl+shift+i in your Browser. Then select "Console" in the menu.
+  On the right side beside "Filter" select "All levels" and enable "Verbose". This will show all console.debug output messages.
+  MarkdownToFoundry messages begin with "M2F ... some .. text"
 
 ## Profile Management
 

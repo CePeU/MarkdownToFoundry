@@ -283,6 +283,7 @@ component	Component	The parent component to manage the lifecycle of the rendered
 						//build the picture list to be uploaded and the paths to which directory they are uploaded
 						// TODO: for batch ObsidianPictureCollection should probably become a set which collects all picture collections of the page instances
 						obsidianPictureList = await Foundry.buildPictureUploadList(
+							NodeHtml,
 							this.app,
 							this.activeFile,
 							picturePath
