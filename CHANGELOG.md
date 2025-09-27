@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.1] / Unreleased
+## [1.1.1] / 2025-09-27
 
 - Adjusted regex for secrets again. The regex needs to have a wider scope
 See: [Issue 19[(https://github.com/CePeU/MarkdownToFoundry/issues/19)
