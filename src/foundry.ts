@@ -1763,35 +1763,50 @@ static async buildPictureUploadList(nodeHtml:HTMLElement,app: App, noteFile: TFi
 //FIXME: The Regex needs to be smarter to fetch everything between base path and last questionmark. Linux allows for questionmarks in filenames and maybe also in paths
 // Remove the app protocol and query parameters
 const cleanPath = imgSrc.split('?')[0].replace(/^app:\/\/[0-9a-f]+/, '');
-//debug.log('Cleaned picture path:', cleanPath);
-
-// Normalize the path - makes sure to remove redundant slashes and backslashes
-const normalizedPath = normalizePath(cleanPath);
-//debug.log('Normalized picture path:', normalizedPath);
+debug.log('Cleaned picture path:', cleanPath);
 
 //TODO: Check if only URI paths can and should be used (for mobile and in general for special characters?)
 //The html has an uri path so we need to return in to a non uri
-const cleanedUriPath = decodeURIComponent(normalizedPath);
-//debug.log('Decoded URI path:', cleanedUriPath);
+const cleanedUriPath = decodeURIComponent(cleanPath);
+debug.log('Decoded URI path:', cleanedUriPath);
+
+// Normalize the path - makes sure to remove redundant slashes and backslashes
+const normalizedPicturedPath = normalizePath(cleanedUriPath);
+debug.log('Normalized picture path:', normalizedPicturedPath);
+
 
 // Normalize the obsidianNoteBasePath - makes sure to remove redundant slashes and backslashes
 const normalizedBasePath = normalizePath(obsidianNoteBasePath);
-//debug.log('Normalized base path:', normalizedBasePath);
+debug.log('Normalized base path:', normalizedBasePath);
 
+//Split off the base path part of the full picture link and if base parts are "identical"
+// derive the relative path
+const splitOffBasePathForCheck=normalizedPicturedPath.slice(0,normalizedBasePath.length)
+debug.log("SplitOffPart",splitOffBasePathForCheck)
+let constructRelativePath=""
+if (splitOffBasePathForCheck.toLocaleLowerCase()===normalizedBasePath.toLocaleLowerCase()){
+constructRelativePath = normalizedPicturedPath.slice(normalizedBasePath.length,normalizedPicturedPath.length)
+} else {
+	new Notice(`Base path mismatch! Relative vault path to picure ${imgSrc} could not be retrieved. Vault base path is ${normalizedBasePath}`, 5000); // 5000 ms = 5 seconds duration
+	debug.log(`Base path mismatch! Relative vault path to picure ${imgSrc} could not be retrieved. Vault base path is ${normalizedBasePath}`);
+}
 // Extract relative path with a regex
-const relativePath = cleanedUriPath.replace(normalizedBasePath, '').replace(/^[\\/]/, '');
-//debug.log('Relative path:', relativePath);
+//const relativePath = cleanedUriPath.replace(normalizedBasePath, '').replace(/^[\\/]/, '');
+debug.log('Relative picture path:', constructRelativePath);
 
 // Get TFile object
 const noteFilePath = noteFile?.path ?? "";
+//const pictureFile = this.app.metadataCache.getFirstLinkpathDest(
+//	relativePath,noteFilePath,
+//	);
 const pictureFile = this.app.metadataCache.getFirstLinkpathDest(
-	relativePath,noteFilePath,
+	constructRelativePath,noteFilePath,
 	);
 if (!pictureFile) {
-	console.log('No TFile found for path:', relativePath);
+	debug.log('No TFile found for path:', constructRelativePath);
 	continue; //skip if no pictureFile found
 }
-debug.log('Extracted pictureFile path:', relativePath);
+debug.log('Extracted pictureFile path:', constructRelativePath);
 debug.log('Picture TFile object:', pictureFile);
 debug.log('Picture file extension:', pictureFile?.extension);
 

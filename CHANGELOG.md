@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.1] / Unreleased
+
+- Adjusted regex for secrets again. The regex needs to have a wider scope
+See: [Issue 19[(https://github.com/CePeU/MarkdownToFoundry/issues/19)
+- TFile path cannot be found if a samba share is used. Adjusted the path so the base path for getting the pictures is correct even with samba shares. 
+Now the path is cleaned till no backslash remains before it the path is normalized
+See: [Issue 18](https://github.com/CePeU/MarkdownToFoundry/issues/18)
+- Spelling in Readme.md and a wrong regex exaple have been corrected
+
 ## [1.1.0] / 2025-09-21
 
 ### Added
@@ -32,6 +41,7 @@ All linking/relinking selections have been put under  **Foundry journal relinkin
 - **Changed picture collection function buildPictureUploadList to work on rendered HTML instead of embedds.**
 This allows for Dataview and other plugins to render completly and including pictures and to export the rendered result.
 This will also make it easier to export the rendered HTML to file paths and adjust the HTML for relative file paths in the filesystem.
+- Changed regex which grabs the secret to add the secret id. This should now be a more stable regex.
 
 ## [1.0.2] / 2025-09-14
 ### Removed

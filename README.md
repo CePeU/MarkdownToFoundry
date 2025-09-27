@@ -17,7 +17,8 @@ content creators are affected by this if I am informed correctly)
 
 ### Obsidian pros
 - Better editor (with plugins, undo, formatting etc.)
-- Dataview plugin and now Base (even if you need to use Dataview for my plugin)!
+- Dataview plugin and now Base    
+(even if you need to use Dataview to utilize my plugin to it's fullest potential! Take a look [NPC overview](https://github.com/CePeU/MarkdownToFoundry/wiki/Demo))
 - Second window during gameplay (one for Foundry one for Obsidian = more Screen size)
 - note centric + a lot of plugins for that
 - better/easier backup
@@ -303,8 +304,8 @@ The dirty HTML ouput is somethink like this:
 For Foundry VTT we need a "section" tag instead of a div tag. So we change the tag.  
 
 The rule fields are filled with:   
-Field1: div[data-callout="secret"]     
-Field2: secret   
+**Field1:** div[data-callout="secret"]     
+**Field2:** secret   
 
 We use the query selector div[data-callout="secret"] which will trigger on every div with an attribute data-callout="secret"
 and change each div which matches to a "section" tag.   
@@ -322,26 +323,29 @@ You can specify what regex rules are applied and in which order.
 #### Example:
 Remember that our tag has now been changed to a section tag but the attributes and classes remain?   
 Some other tags have also changed during the tag replacement according to the rules set there.   
-We no have an output like this:   
+We now have an output like this:   
 `<section ... data-callout="secret"...class="callout"> <summary><span> Some Secret GM Stuff</span></summary>...</section>`    
 This output would be a nice foldable details structure if not for the section tags.   
 In fact this is how a callout which is not of type secret is exported.   
 It would look like this:   
-`<details ... data-callout="secret"...class="callout"> <summary><span> Some Secret GM Stuff</span></summary>...</details>`   
+`<details ... data-callout="secret"...class="callout"> <summary><span> Some Secret GM stuff</span></summary>...</details>`   
 
 But for our usecase we need a section with a class="secret" and an id with a random uuid conforming to Foundry requirements.   
-It would look like this:   
+It should look like this in the end:   
 `<section class="secret" id="xxxxxxxxxxxx"> Secret Text here </section>`   
 
 So the next step is to grab the correct HTML tag and classes and rewrite them. This is allready done as   
 a string operation on the HTML text and not as a node parsing. So we input the following Regex expression:   
 
-Field1:`<section[^>]*data-callout="secret"[^>]*class="callout"[^>]*>\s*<summary><span>(.*?)<\/span><\/summary>/g`
+**Field1:**   
+`<section[^>]*data-callout="secret"[^>]*class="callout"[^>]*>\s*<summary>(.*?)<\/summary>/g`
+
 and the desired replacement   
-Field2: `<section  class="secret">`   
+
+**Field2:** `<section  class="secret">`   
 
 The result will be something like this:   
-`<section  class="secret"> Your secret text </section>section>`   
+`<section  class="secret"><summary>Some secret GM stuff</summary></section>`   
 
 ### Javascript Replacements
 - **Description**: Add custom JavaScript functions to modify the HTML during export.
@@ -364,8 +368,10 @@ const newHtml = html.replace(/class="secret"/g, function(match) {
 });  
 return newHtml  
 
-This will replace als classes="secret" texts with classes="secret" id="xxxxxxxxx" and generate the desired HTML:   
-`<section  class="secret" id="xxxxxxxxxx"> Your secret text </section>section>`  
+This will replace all classes="secret" texts with classes="secret" id="xxxxxxxxx" and generate the desired HTML:   
+`<section  class="secret" id="xxxxxxxxxx"><summary> Some secret GM stuff</summar></section>`  
+
+If you want you can improve by also cleaning out the summary tags during as a second and third step.
 ***
 
 ## Detailed Export Rules
@@ -410,6 +416,8 @@ journal handling else there would be a bigger need to fix those issues or patreo
 - Do not place any base64 encoded pictures between span elements
 - Be careful with span elements as they seem to be arbitrarily sanitized
 - Font tags are problematic/useless (but I can understand that up to a point)
+- asof 26.09.2025 Foundry V13 has a bug in using nested secrets
+
 - .... to be continued
   
 ### Remove Frontmatter

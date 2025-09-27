@@ -171,7 +171,7 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
         ""
       ],
       [
-        "<section[^>]*data-callout=\"secret\"[^>]*class=\"callout\"[^>]*>\\s*<summary><span>(.*?)<\\/span><\\/summary>/g",
+        "<section[^>]*data-callout=\"secret\"[^>]*class=\"callout\"[^>]*>\\s*<summary>(.*?)<\\/summary>/g",
         "<section  class=\"secret\">"
       ],
       [
