@@ -1,6 +1,6 @@
 {
   "name": "markdowntofoundry",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "exports markdown to html and allows to adjust the html code. It then allows to export the html to clipboard, as file and to foundry vtt.",
   "main": "main.js",
   "scripts": {
