@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "test": "node esbuild.config.mjs test",
-    "posttest": "cp ma*.j* styles.css data.json /opt/Obsidian/ObsidianDev/DSAObsidianDev/.obsidian/plugins/markdowntofoundry && chown -R nobody:sambashare /opt/Obsidian/ObsidianDev/DSAObsidianDev/.obsidian/plugins/markdowntofoundry/*.*",
+    "posttest": "cp ma*.j* styles.css data.json '/home/psu/Obsidian Vault A/DEV_A DSA Kampagne/.obsidian/plugins/markdowntofoundry'",
     "win": "node esbuild.config.mjs test",
     "postwin": "copy ma*.j* \"E:\\Projekte\\Obsidian Vault\\DEV_B OLD DSA Kampagne\\.obsidian\\plugins\\markdowntofoundry\" && copy styles.css \"E:\\Projekte\\Obsidian Vault\\DEV_B OLD DSA Kampagne\\.obsidian\\plugins\\markdowntofoundry\" && copy data.json \"E:\\Projekte\\Obsidian Vault\\DEV_B OLD DSA Kampagne\\.obsidian\\plugins\\markdowntofoundry\"",
     "windev": "node esbuild.config.mjs test",

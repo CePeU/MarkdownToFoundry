@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
 //import { Hmac } from "crypto"; probably needed later for automatic login into foundry session
-import xxhash, { XXHashAPI } from "xxhash-wasm"; //fast hashing algo for pictures - not sure if note hashing also makes sense
+//import xxhash, { XXHashAPI } from "xxhash-wasm"; //fast hashing algo for pictures - not sure if note hashing also makes sense
 //import * as cheerio from 'cheerio'; //https://www.npmjs.com/package/cheerio
 import { MarkdownToFoundrySettings } from "./settings";
 //import { MarkdownToFoundry } from "./plugins";
@@ -137,6 +137,7 @@ export interface FoundryHtml {
 	//obsidianFileName: string;
 	//obsidianFilePath: string;
 	obsidianFileObj: TFile;
+	obsidianRelPath: string;
 	//obsidianFileModificationTime: number;
 	//obsidianFileHash?: string;
 	//obsidianFileHashName?: string;
@@ -152,6 +153,7 @@ export interface FoundryHtml {
 export interface FoundryHtmlLinkInformation {
 	obsidianNoteUUID: string; // the Obsidian UUID of the note/page
 	linkPath: string; // path to the note in Obsidian
+	linkFileName:string;
 	linkText: string; // text of the link in Foundry
 	linkDestinationUUID: string; // destination of the link in Foundry
 	isAnkerLink: boolean; // true if the link is an anchor link, false if it is a normal link
@@ -268,7 +270,7 @@ export async function apiPost_CreateFoundryMacro(apiKey: string, clientId: strin
 export class Foundry {
 	static app: App;
 	static settings: MarkdownToFoundrySettings;
-	static xxhashAPI: XXHashAPI;
+	//static xxhashAPI: XXHashAPI;
 
 	static workMapUUID: Map<string, string>; // a map to work with the UUIDs and file paths
 	static obsidianUUIDs: Map<string, string>; // Map of Obsidian UUIDs to file paths
@@ -557,8 +559,8 @@ export class Foundry {
 
 		// FIXME: For Batch an update of all folders and journals needs to be made!
 
-		if (Foundry.settings.foundryWriteFrontmatter) {
-			this.writeFrontmatter(Foundry.app, this.noteFile, updateFrontmatter)
+		if (Foundry.settings.foundryFrontmatterWriteBack.isWriteBack) {
+			this.writeFrontmatter(Foundry.app, this.noteFile, updateFrontmatter,Foundry.settings)
 		}
 
 		if (Foundry.settings.foundryMacroLinkingRun) {
@@ -606,7 +608,7 @@ export class Foundry {
 
 
 			// Check if foundry export is selected an read frontmatter for foundry
-			if (Foundry.settings.foundryWriteFrontmatter) {
+			if (Foundry.settings.foundryFrontmatterWriteBack.isWriteBack) {
 				// 'file' is a TFile object representing the note
 				let result = await app.fileManager.processFrontMatter(file, frontmatter => {
 					if (frontmatter) {
@@ -713,7 +715,7 @@ export class Foundry {
 			// this is the basic intialization of ObsdianPictureCollection. It gets filled with the pictures of the current note(s) later
 			// this is done with Foundry.buildPictureUploadList(noteFile, html) later when it is clear how many notes to be processed
 			Foundry.ObsidianPictureCollection = []; //init the upload picture collection
-			Foundry.xxhashAPI = await xxhash(); // init the hasher object
+			//Foundry.xxhashAPI = await xxhash(); // init the hasher object
 		} catch (error) {
 			// Extract a safe error message
 			let message = "Unknown error";
@@ -1193,43 +1195,70 @@ export class Foundry {
 
 
 
-	public async writeFrontmatter(app: App, file: TFile, update: boolean = false) {
+	public async writeFrontmatter(app: App, file: TFile, update: boolean = false, settings?: MarkdownToFoundrySettings) {
 		debug.log("writeFrontmatter is beeing executed")
-		if (Foundry.settings.foundryWriteFrontmatter) {
+		if (Foundry.settings.foundryFrontmatterWriteBack.isWriteBack) {
 			// Assume 'file' is a TFile object representing your note
 			await app.fileManager.processFrontMatter(file, frontmatter => {
 				//this probably makes no sense, either it is set by user or not
 				//then again if something was set it will not be touched so in that case it makes sense?
-				if (!update) {
+				
+				//TODO: Investigate the update logic with the new changes introduced in 1.2.0 - the code should do the same regardless if update or not
+				if (!update) { // this checks if an update/first time write shall be triggered if the frontmatter does not exist- this is independent of the settings
 					if (!frontmatter["VTT_Folder"]) {
+						if(settings?.foundryFrontmatterWriteBack?.Folder){
 						frontmatter["VTT_Folder"] = this.noteFolderDestinationName;
+						}
 					}
 					if (!frontmatter["VTT_Journal"]) {
+						if(settings?.foundryFrontmatterWriteBack?.Journal){
 						frontmatter["VTT_Journal"] = this.noteJournalDestinationName;
+						}
 					}
 					if (!frontmatter["VTT_PageTitle"]) { // Maybe there was a reason it was NOT !frontmatter?
+						if(settings?.foundryFrontmatterWriteBack?.PageTitle){
 						frontmatter["VTT_PageTitle"] = this.notePageTitle;
+						}
 					}
 					if (!frontmatter["VTT_Page"]) {
+						if(settings?.foundryFrontmatterWriteBack?.Page){
 						frontmatter["VTT_Page"] = this.noteIsPage;
+						}
 					}
 					if (!frontmatter["VTT_PicturePath"]) {
+						if(settings?.foundryFrontmatterWriteBack?.PicturePath){
 						frontmatter["VTT_PicturePath"] = this.notePictureDestinationPath;
+						}
 					}
 					//  can probably be deleted up to this point ?
 
 					if (!frontmatter["VTT_UUID"]) {
+						if(settings?.foundryFrontmatterWriteBack?.UUID){
 						frontmatter["VTT_UUID"] = this.notePageId;
+						}
 					}
 				}
 
-				if (update) {
+				if (update) {// this triggers if frontmatter shall be set on a forced update regardless if the frontmatter exists
+
+					if(settings?.foundryFrontmatterWriteBack?.Folder){
 					frontmatter["VTT_Folder"] = this.noteFolderDestinationName;
+					}
+					if(settings?.foundryFrontmatterWriteBack?.Journal){
 					frontmatter["VTT_Journal"] = this.noteJournalDestinationName;
+					}
+					if(settings?.foundryFrontmatterWriteBack?.PageTitle){
 					frontmatter["VTT_PageTitle"] = this.notePageTitle;
+					}
+					if(settings?.foundryFrontmatterWriteBack?.Page){
 					frontmatter["VTT_Page"] = this.noteIsPage;
+					}
+					if(settings?.foundryFrontmatterWriteBack?.PicturePath){
 					frontmatter["VTT_PicturePath"] = this.notePictureDestinationPath;
+					}
+					if(settings?.foundryFrontmatterWriteBack?.UUID){
 					frontmatter["VTT_UUID"] = this.notePageId;
+					}
 				}
 			});
 		}
@@ -1708,6 +1737,7 @@ function getTFileByVaultPath(app: App, vaultPath: string): TFile | null {
   return af instanceof TFile ? af : null;
 }
 */
+/*
 static async buildPictureUploadList(nodeHtml:HTMLElement,app: App, noteFile: TFile, pictureSavePath: string): Promise<ObsidianPicture[]> {
 	debug.log("buildPictureUploadList function started");
 	const pictureList: ObsidianPicture[] = [];
@@ -1849,7 +1879,7 @@ if (adapter instanceof FileSystemAdapter) {
 				pictureList.push(obsidianPicture);				
 }
 	return pictureList ?? [];
-}
+}*/
 
 /*
 static async buildPictureUploadList_depracated(app: App, noteFile: TFile, pictureSavePath: string): Promise<ObsidianPicture[]> {

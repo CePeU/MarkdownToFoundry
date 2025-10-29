@@ -1,13 +1,32 @@
 # Changelog
 
+## [1.2.0] / 2025-10-30
+
+### Fixed
+- unlinked links are now handled propperly during parsing and no link reference is stored subsequently file is now exported to foundry
+- Readme adjusted with new functionality and an update to the foundryID method usable for templater (templater example still missing)
+- file safe handling of export for linux and windows (Macos als enabled but not tested)
+
+### Added
+- enhanced export functions for html to file system
+- improve file export 
+   - allows for setting a picture folder or write it into the same folder
+   - keep the vault structure or declare a single folder where to save the files 
+- make footer and header export more granular (linux and windows have been tentavitely tested, MacOS should work but could not be tested)
+See: [Issue #6](https://github.com/CePeU/MarkdownToFoundry/issues/6)
+- Obsidian UUID can now be created and written seperately
+See: [Issue #3](https://github.com/CePeU/MarkdownToFoundry/issues/3)
+- Foundry writeback can now be granularly set
+
 ## [1.1.1] / 2025-09-27
 
+### Fixed
 - Adjusted regex for secrets again. The regex needs to have a wider scope
-See: [Issue 19[(https://github.com/CePeU/MarkdownToFoundry/issues/19)
+See: [Issue 19](https://github.com/CePeU/MarkdownToFoundry/issues/19)
 - TFile path cannot be found if a samba share is used. Adjusted the path so the base path for getting the pictures is correct even with samba shares. 
 Now the path is cleaned till no backslash remains before it the path is normalized
-See: [Issue 18](https://github.com/CePeU/MarkdownToFoundry/issues/18)
-- Spelling in Readme.md and a wrong regex exaple have been corrected
+See: [Issue #18](https://github.com/CePeU/MarkdownToFoundry/issues/18)
+- Spelling in Readme.md and a wrong regex example have been corrected
 
 ## [1.1.0] / 2025-09-21
 

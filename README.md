@@ -230,7 +230,7 @@ Input a new name and the currently active profile will be cloned.
 
 ***
 
-## HTML Export Settings
+## Clipboard export settings
 
 ### Clipboard Export
 - **Description**: Export the HTML to the clipboard.
@@ -241,6 +241,23 @@ You can define if a copy of the overworked HTML is pasted to the clipboard or no
 This is especially helpfull if you are developing a new export profile as you can see what will
 be delivered to Foundry VTT. Also this allows for copy and paste into other applications like
 for example Bookstack.
+
+### Header and footers for clipboard export
+- **Description**: Add custom text or HTML to the header and footer of the exported HTML.
+- **Actions**:
+- Add or edit header and footer content.
+
+You can add any text you like as header and footer to the output html text. Make sure it makes sense!
+
+## HTML file export settings
+
+### Header and footers for HTML file export
+- **Description**: Add custom text or HTML to the header and footer of the exported HTML.
+- **Actions**:
+- Add or edit header and footer content.
+
+You can add any text you like as header and footer to the output html text. Make sure it makes sense!
+(For file export you thus can add style.css and a body tag)    
 
 ### File Export
 - **Description**: Export the HTML to a file.
@@ -273,6 +290,12 @@ to analyze the HTML and being able to create rules to clean the HTML to your own
   - Reset attributes to default.
   
 You can specify which attributes will NOT be cleaned from the HTML (see step 6)
+
+### Reset attributes
+- A button to reset attributes to keep to a standard settings
+
+***
+## Classes
 
 ### Classes to Keep
 - **Description**: Add class names you want to keep when rendering Markdown to HTML.
@@ -376,14 +399,6 @@ If you want you can improve by also cleaning out the summary tags during as a se
 
 ## Detailed Export Rules
 
-### Header and Footer for HTML
-- **Description**: Add custom text or HTML to the header and footer of the exported HTML.
-- **Actions**:
-  - Add or edit header and footer content.
-
-You can add any text you like as header and footer to the output html text. Make sure it makes sense!
-(For Foundry you thus can wrap the whole export in a div with a special class and bind your css to that)    
-
 ### Wikilink Resolution
 - **Description**: Resolve internal Obsidian wikilinks and export them with the Obsidian vault path.
 - **Default**: Disabled.
@@ -431,6 +446,14 @@ they can if they like!
 ***
 
 ## Foundry Export Settings
+
+### Header and footers for clipboard export
+- **Description**: Add custom text or HTML to the header and footer of the exported HTML.
+- **Actions**:
+- Add or edit header and footer content.
+
+You can add any text you like as header and footer to the output html text. Make sure it makes sense!
+(For Foundry you thus can wrap the whole export in a div with a special class and bind your css to that)   
 
 ### Foundry Export
 - **Description**: Export the HTML to Foundry VTT via a REST call.
@@ -507,7 +530,7 @@ Just import your next journal/page and use the macro to link both journals/pages
 (Example how this works and what advantages an Obsidian UUID has)
 
 
-### Journal Linking After Every Export
+### Foundry VTT Journal Linking After Every Export
 - **Description**: Automatically run a journal linking process after each export.
 - **Default**: Disabled.
 - **Toggle**: Enable or disable this feature.
@@ -568,6 +591,14 @@ will overwrite standard settings. If no settings are found the plugin will defau
 - **Description**: Allows to set standard export settings for Foundry export
 - Default: Disabled
 
+### Header and footers for Foundry HTML export
+- **Description**: Add custom text or HTML to the header and footer of the exported HTML.
+- **Actions**:
+- Add or edit header and footer content.
+
+You can add any text you like as header and footer to the output html text. Make sure it makes sense!
+(For Foundry export you could add a div and classes to bind your css to)  
+
 ### Foundry Folder
 - **Description**: Set the default Foundry VTT export folder.
 - **Input**: Enter the folder name.
@@ -580,14 +611,24 @@ will overwrite standard settings. If no settings are found the plugin will defau
 - **Description**: Set the default Foundry VTT picture export path.
 - **Input**: Enter the picture path.
 
-### Obsidian Frontmatter Usage and Foundry Writeback
+***
+
+## Frontmatter Settings and Usage
+
+### Obsidian frontmatter UID
+- **Description**: Write an UUID into the Obsidian note when it is first exported.
+- **Default**: Disabled.
+- **Toggle**: Enable or disable this feature.
+
+It will give your obsidian note an UUID which can be used by the plugin to find the Obsidian note and the corresponding Foundry note regardless if the Obsidian note has been moved.
+
+### Foundry writeback options
 - **Description**: Use frontmatter for export settings and write back Foundry information into Obsidian pages.
 - **Default**: Disabled.
 - **Toggle**: Enable or disable this feature.
 
 This will write information about your exported note to the Obsidian note frontmatter. 
-It also will give your obsidian note an UUID which can be used by the plugin to find the Obsidian note and the corresponding Foundry note
-regardless if the Obsidian note has been moved.
+
 
 #### How this works:
 The plugin exports additional meta information with your export (Foundry flags). Each page/note will receive informations about
@@ -614,6 +655,17 @@ So far the Obsidian UUID is for relinking notes correctly even if the location a
 lead to two Foundry pages having the same Obsidian UUID if they are exported twice to different locations in Foundry (Folder/Journal)
 
 ***
+
+## Other Functions
+
+### Templater
+The plugin allows for calling a function to generate a 16 character id which will work with foundry.
+The id to call this is "createfoundryId" or you us CTRL+P and use MarkdownToFoundryVTT: generate foundry ID. You can use this function with templater to create the Obsidian UUID during usage of templater.  
+You can also use it to generate a secretID if you need it for any reason.
+(TODO: make a templater example)
+
+***
+
 ## API Documentation
 
 - Obsidian: [https://github.com/obsidianmd/obsidian-api](https://github.com/obsidianmd/obsidian-api)

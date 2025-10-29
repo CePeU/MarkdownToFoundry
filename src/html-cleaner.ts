@@ -18,6 +18,7 @@ export async function cleanHtml(parent: HTMLElement, settings: MarkdownToFoundry
     foundryLinks: [],
     obsidianFileObj: sourceFile,
     obsidianUUID: "",
+    obsidianRelPath:"",
   };
   await convertImages(parent, settings, sourceFile); //convert image paths in html or convert to base64
   FoundryHtml.foundryLinks = resolveInternalLinks(parent, settings, sourceFile); // resolve links in html to full internal links
@@ -46,7 +47,8 @@ export async function cleanHtml(parent: HTMLElement, settings: MarkdownToFoundry
     html = runJavaScript(settings.jsCode, html, scriptApi) ?? html;
   }
   // set the cleaned html to the foundryHtml object
-  FoundryHtml.html = settings.footerAndHeader[0] + html + settings.footerAndHeader[1]; //let us add additional html informations if desired at the end of rendering AND cleaning again
+  FoundryHtml.html = html
+  //FoundryHtml.html = settings.footerAndHeader[0] + html + settings.footerAndHeader[1]; //let us add additional html informations if desired at the end of rendering AND cleaning again
   //TODO: Investigate if footer and Header should not only make sense for file export OR if there needs to be a setting to decide to add it to clippboard,foundry export,file export
   //Probably there should be an array with the type of export and it should be selectable on the modal ==> This is a good solution!
   FoundryHtml.obsidianFileObj = sourceFile; // set the obsidian file object to the foundryHtml object so file and conten information stay together
@@ -139,7 +141,7 @@ function parseRegexPattern(input: string): { regexPattern: string; regexFlags: s
 //function to modify tags - allows to create tags for callouts and also necessary to work around Foundry bugs in html sanitizing which are not corrected by foundry devs
 function replaceTag(parent: HTMLElement, settings: MarkdownToFoundrySettings) {
   
-  debug.log("Replacing HTML tag elements in node modus: [replaceTag]");
+  //debug.log("Replacing HTML tag elements in node modus: [replaceTag]");
   
   if (settings.rulesForTags) {
     for (let i = 0; i < settings.rulesForTags.length; i++) {
@@ -197,6 +199,7 @@ function resolveInternalLinks(parent: HTMLElement, settings: MarkdownToFoundrySe
       let foundryLink: FoundryHtmlLinkInformation = {
         obsidianNoteUUID: "",
         linkPath: "",
+        linkFileName: "",
         linkText: "",
         linkDestinationUUID: "",
         isAnkerLink: true,
@@ -241,15 +244,18 @@ function resolveInternalLinks(parent: HTMLElement, settings: MarkdownToFoundrySe
       const hrefToResolve = splitLinkResult.path //store the path part
       if (hrefToResolve) { // if there is something to resolve resolve it
         const targetFile = this.app.metadataCache.getFirstLinkpathDest(hrefToResolve, activeFile.path); // get the Obsidian file object according to the path part of the link
-        const targetFilePath = targetFile.path //store the file path of the resolved obsidian file object
-
+        //What target file/link is found is in targetFile
+        const targetFilePath = targetFile?.path || ""//store the file path of the resolved obsidian file object
+        const targetFileName = targetFile?.name || ""
+        //Potentiall a target file might exist, Obsidian reso
         if (targetFile) {
-          if (settings.foundryWriteFrontmatter) {
+          if (settings.foundryFrontmatterWriteBack.isWriteBack && settings.exportFoundry) {
           foundryLink.linkDestinationUUID = generateIdForFile(this.app, targetFile) // generade ID for notes which are link destinations or return the existing UUID of the found file. 
           // This will unqiquely fix the destination link to the right note even if a file/note is later moved in the path structure of obsidian
             } else {foundryLink.linkDestinationUUID = ""}
-        }
+        //} former end of targetFile if needs to be lower if there is no true target file to resolve
         foundryLink.linkPath = targetFilePath; // set the link path to the resolved obsidian file object path
+        foundryLink.linkFileName = targetFileName // set the name of the linked file - for html file export
         foundryLink.linkText = link.textContent ?? ""; // set the link text to the text content of the link
         foundryLink.isAnkerLink = false // if it is a normal link we change anker link back not to be an anker link
         link.setAttribute("href", targetFilePath);
@@ -262,7 +268,7 @@ function resolveInternalLinks(parent: HTMLElement, settings: MarkdownToFoundrySe
           keepLink = false;
         }
       }
-
+    }
       // the special case that it is a purely internal link on the same note is handled on the foundry macro which replaces the links
 
       // make sure only markkdown targets and anker links are used as links
@@ -364,5 +370,85 @@ export async function toBase64(srcFilePath: string) {
         })
     )
     .then(fr => fr.result as string);
+}
+
+export function replaceHrefPaths(exportFilePath:string,html:string,linkList: FoundryHtmlLinkInformation[],isVaultStructure?:boolean ){
+  let targetPath=""
+  let adjustedHtml = html;
+  let oldHtml = null;
+
+  // Hardcoded data-heading to id transform. For Foundry export due to Foundry "bug" or by design the id
+  // cannot be choosen
+  //TODO: Make this a replacement option in the menu for html file export?
+
+  /*
+This function takes any HTML string and replaces all instances of data-heading="..." with id="...".​
+The regular expression /data-heading="([^"]*)"/g looks for data-heading="..." and captures the value inside the quotes.
+The replacement string 'id="$1"' puts the (first and only) captured value inside an id attribute.
+*/
+  adjustedHtml=adjustedHtml.replace(/data-heading="([^"]*)"/g, 'id="$1"')
+  
+  if (linkList.length===0) return adjustedHtml
+  
+  // Case 1: Inline anchor only
+  for (const link of linkList) {
+  targetPath=exportFilePath
+     if (isVaultStructure){
+    targetPath = targetPath +  link.linkPath.replace(/\.md$/, '.html');
+  } else {
+    targetPath = targetPath + link.linkFileName.replace(/\.md$/, '.html');
+  }
+
+            // === Step 1: Handle Anchor (Heading) Links ===
+            let anchorPart = "";
+            if (link.isAnkerLink && link.ankerLink) {
+                // Split the anchor by hash and slugify the last fragment
+                const hashFragments = link.ankerLink.split("#");
+                const lastFragment = hashFragments[hashFragments.length - 1];
+
+                // Slugify: lower case, replace spaces with hyphens, trim hyphens
+                const slug = lastFragment
+                    //.toLowerCase()
+                    //.replace(/ /g, "-")
+                    //.replace(/^-+|-+$/g, "");
+
+                if (slug) {
+                    anchorPart = `#${slug}`;
+                }
+            }
+
+            // === Step 3: Build Replacement String ===
+            const linkText = link.linkText || "";
+            const replacement = `<a href="${targetPath}${anchorPart}">${linkText}</a>`;
+
+
+
+        // Case 1: .md file with anchor ==> do the more specific replace first
+            if (link.linkPath === "" && link.ankerLink) {
+                const escapedLinkPath = escapeRegex(link.linkPath + link.ankerLink);
+                oldHtml = `<a[^>]*href=["']${escapedLinkPath}["'][^>]*>.*?<\/a>`;
+                
+            // Case 2: Inline anchor only
+            } else if (link.linkPath && link.isAnkerLink) {
+              const escapedLinkPath = escapeRegex(link.linkPath + link.ankerLink);
+                oldHtml = `<a[^>]*href=["']${escapedLinkPath}["'][^>]*>.*?<\/a>`;
+            // Case 3: External .md file without anchor/
+            } else if (link.linkPath && !link.isAnkerLink) {
+                const escapedLinkPath = escapeRegex(link.linkPath);
+                oldHtml = `<a[^>]*href=["']${escapedLinkPath}["'][^>]*>.*?<\/a>`;
+            
+ 
+            } else {
+                // Fallback for other link types; nothing to set
+                debug.log(`❌ Could not match Link: ${link} in current note for linked note ${link.linkPath}`);
+            }
+            if (oldHtml) {
+                const regex = new RegExp(oldHtml, "gm");
+                adjustedHtml = adjustedHtml.replace(regex, replacement);
+                // Mark the link as resolved successfully
+                //link.linkResolved = true;
+            }
+            }
+return adjustedHtml
 }
 

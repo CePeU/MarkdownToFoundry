@@ -29,6 +29,8 @@ export interface MarkdownToFoundrySettings {
 	jsCode: string;
 	exportDirty: boolean;
 	exportFile: boolean;
+	isExportVaultPaths: boolean;
+	htmlPictureExportFilePath:string;
 	exportClipboard: boolean;
 	internalLinkResolution: boolean;
 	htmlExportFilePath: string; //file path for hmtl export file
@@ -36,7 +38,11 @@ export interface MarkdownToFoundrySettings {
 	removeFrontmatter: boolean; // Setting for removing frontmatter
 	assetSaveRuleset: string[][]; // NOT implemented yet
 	excludeFoldersByregex: string; //NOT implemented yet
-	footerAndHeader: string[]; //setting for a footer and header which might include css to be added to html as last step
+	footerAndHeader: {
+		clipboard: string[];
+		fileHTML: string[];
+		foundryHTML: string[];
+	}; //setting for a footer and header which might include css to be added to html as last step
 	exportFoundry: boolean; // flag for discerning if a foundry export shall take place
 	foundryApiKey: string; // api key for foundry export
 	foundryRelayServer: string; // ip or url for foundry relay server
@@ -50,8 +56,18 @@ export interface MarkdownToFoundrySettings {
 	foundryFolder: string; //standard foundry export folder
 	foundryJournal: string; //standard foundry Journal entry
 	foundryPicturePath: string; // standard save path for pictures
-	foundryMacroLinkingRun: boolean,
-	foundryWriteFrontmatter: boolean; // flag for discerning if frontmatter entries shall be read and written back into obsidian pages
+	foundryMacroLinkingRun: boolean;
+	ObsidianWriteFrontmatter: boolean; // flag for discerning if frontmatter entries shall be read and written back into obsidian pages
+	foundryFrontmatterWriteBack:{		
+		isWriteBack:boolean;
+		Folder: boolean;
+		Journal: boolean;
+		PageTitle: boolean;
+		Page: boolean;
+		PicturePath: boolean;
+		UUID: boolean;
+	};
+
 }
 
 export interface ProfileSettings {
@@ -74,6 +90,8 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
 		jsCode: "",
 		exportDirty: false,
 		exportFile: false,
+		isExportVaultPaths: false,
+		htmlPictureExportFilePath:"",
 		exportClipboard: true,
 		exportFoundry: false,
 		internalLinkResolution: false,
@@ -90,13 +108,26 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
 		foundryClientId: "",
 		foundryIP: "",
 		excludeFoldersByregex: "",
-		footerAndHeader: ["", ""],
+		footerAndHeader: {
+			clipboard: ["", ""],
+			fileHTML: ["", ""],
+			foundryHTML: ["", ""],
+		},
 		foundrySettingsUsed: false,
 		foundryFolder: "Obsidian Export",
 		foundryJournal: "Obsidian",
 		foundryPicturePath: "assets/pictures",
 		foundryMacroLinkingRun: false,
-		foundryWriteFrontmatter: false,
+		ObsidianWriteFrontmatter: false,
+		foundryFrontmatterWriteBack:{		
+			isWriteBack:false,
+			Folder: false,
+			Journal: false,
+			PageTitle: false,
+			Page: false,
+			PicturePath: false,
+			UUID: false,
+	}
 	},
 	Foundry_export: {
 	profileVersion:{
@@ -182,6 +213,8 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
     jsCode: "const newHtml = html.replace(/class=\"secret\"/g, function(match) {\n  const newId = api.createID();  // Called once per match ✅\n  return `class=\"secret\" id=\"secret-${newId}\"`;\n});\nreturn newHtml",
     exportDirty: false,
     exportFile: false,
+	isExportVaultPaths: false,
+	htmlPictureExportFilePath:"",
     exportClipboard: true,
     exportFoundry: true,
     internalLinkResolution: true,
@@ -203,16 +236,26 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
     foundryClientId: "",
     foundryIP: "",
     excludeFoldersByregex: "",
-    footerAndHeader: [
-      "",
-      ""
-    ],
+    footerAndHeader: {
+		clipboard: ["",""],
+		fileHTML: ["",""],
+		foundryHTML: ["",""],
+	},
     foundrySettingsUsed: false,
     foundryFolder: "Obsidian Export",
     foundryJournal: "Obsidian",
     foundryPicturePath: "assets/pictures",
     foundryMacroLinkingRun: true,
-    foundryWriteFrontmatter: false
+    ObsidianWriteFrontmatter: false,
+	foundryFrontmatterWriteBack:{		
+		isWriteBack:false,
+		Folder: false,
+		Journal: false,
+		PageTitle: false,
+		Page: false,
+		PicturePath: false,
+		UUID: false,
+	}
   }
 };
 
@@ -365,6 +408,8 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 							jsCode: this.activeProfileData.jsCode,
 							exportDirty: false, // Default value for dirty export
 							exportFile: this.activeProfileData.exportFile,
+							isExportVaultPaths: this.activeProfileData.isExportVaultPaths,
+							htmlPictureExportFilePath: this.activeProfileData.htmlPictureExportFilePath,
 							exportClipboard: this.activeProfileData.exportClipboard,
 							exportFoundry: this.activeProfileData.exportFoundry,
 							internalLinkResolution: this.activeProfileData.internalLinkResolution,
@@ -381,13 +426,26 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 							foundryClientId: this.activeProfileData.foundryClientId,
 							foundryIP: this.activeProfileData.foundryIP,
 							excludeFoldersByregex: this.activeProfileData.excludeFoldersByregex,
-							footerAndHeader: [this.activeProfileData.footerAndHeader[0], this.activeProfileData.footerAndHeader[1]],
+							footerAndHeader:{ 
+								clipboard: [this.activeProfileData.footerAndHeader.clipboard[0], this.activeProfileData.footerAndHeader.clipboard[1]],
+								fileHTML: [this.activeProfileData.footerAndHeader.fileHTML[0], this.activeProfileData.footerAndHeader.fileHTML[1]],
+								foundryHTML: [this.activeProfileData.footerAndHeader.foundryHTML[0], this.activeProfileData.footerAndHeader.foundryHTML[1]]
+							},
 							foundrySettingsUsed: this.activeProfileData.foundrySettingsUsed,
 							foundryFolder: this.activeProfileData.foundryFolder,
 							foundryJournal: this.activeProfileData.foundryJournal,
 							foundryPicturePath: this.activeProfileData.foundryPicturePath,
 							foundryMacroLinkingRun: this.activeProfileData.foundryMacroLinkingRun,
-							foundryWriteFrontmatter: this.activeProfileData.foundryWriteFrontmatter,
+							ObsidianWriteFrontmatter: this.activeProfileData.ObsidianWriteFrontmatter,
+							foundryFrontmatterWriteBack:{		
+								isWriteBack:this.activeProfileData.foundryFrontmatterWriteBack.isWriteBack,
+								Folder: this.activeProfileData.foundryFrontmatterWriteBack.Folder,
+								Journal: this.activeProfileData.foundryFrontmatterWriteBack.Journal,
+								PageTitle: this.activeProfileData.foundryFrontmatterWriteBack.PageTitle,
+								Page: this.activeProfileData.foundryFrontmatterWriteBack.Page,
+								PicturePath: this.activeProfileData.foundryFrontmatterWriteBack.PicturePath,
+								UUID: this.activeProfileData.foundryFrontmatterWriteBack.UUID,
+							}
 						};
 						this.activateProfile = text.inputEl.value;
 					}
@@ -398,11 +456,11 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 		}
 
 		// HTML export SECTION
-		new Setting(containerEl).setHeading().setName("HTML expport settings");
+		new Setting(containerEl).setHeading().setName("Clipboard export settings");
 		//Clippboard export
 		new Setting(this.containerEl)
 			.setName("Clippboard export")
-			.setDesc("Whether the HTML should be exported to the clippboard.")
+			.setDesc("Whether the HTML should be exported to the clippboard. The data-heading class is needed for anchor links to work.")
 			.addToggle(toggle => {
 				toggle.setValue(this.activeProfileData.exportClipboard);
 				toggle.onChange(async value => {
@@ -415,10 +473,74 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 					}
 				});
 			});
+
+					//Header and footer text
+			new Setting(containerEl)
+				.setName("Header and footers for clipboard export")
+				.setDesc(
+					`The exported HTML is stripped to the core. This allows you to add text before and after the HTML (like body tags and style tags). Make sure it is valid HTML.`
+				)
+				.addButton(button =>
+					button
+						.setIcon("file-code")
+						.setTooltip("Add header and footer")
+						.onClick(() => {
+							/*
+							let arrayForModal: string[][] = this.activeProfileData.rulesForRegex;
+							if (arrayForModal === undefined) {
+								arrayForModal = this._activeProfileData.rulesForRegex;
+							}*/
+
+							// Create new modal
+							const modal = new FooterHeaderModal(this.app, this.activeProfileData.footerAndHeader.clipboard[0],this.activeProfileData.footerAndHeader.clipboard[1], result => {
+								// Store the result (tuple of two strings) in the array
+								if (result[0]) {
+									this.activeProfileData.footerAndHeader.clipboard[0] = result[0];
+								}
+								if (result[1]) {
+									this.activeProfileData.footerAndHeader.clipboard[1] = result[1];
+								}
+								this.save();
+							});
+							modal.open();
+						})
+				);
+
 		// File export
+		new Setting(containerEl).setHeading().setName("HTML file export settings");
+			new Setting(containerEl)
+				.setName("Header and footers for HTML file export")
+				.setDesc(
+					`The exported HTML is stripped to the core. This allows you to add text before and after the HTML (like body tags and style tags). Make sure it is valid HTML.`
+				)
+				.addButton(button =>
+					button
+						.setIcon("file-code")
+						.setTooltip("Add header and footer")
+						.onClick(() => {
+							/*
+							let arrayForModal: string[][] = this.activeProfileData.rulesForRegex;
+							if (arrayForModal === undefined) {
+								arrayForModal = this._activeProfileData.rulesForRegex;
+							}*/
+
+							// Create new modal
+							const modal = new FooterHeaderModal(this.app,this.activeProfileData.footerAndHeader.fileHTML[0],this.activeProfileData.footerAndHeader.fileHTML[1], result => {
+								// Store the result (tuple of two strings) in the array
+								if (result[0]) {
+									this.activeProfileData.footerAndHeader.fileHTML[0] = result[0];
+								}
+								if (result[1]) {
+									this.activeProfileData.footerAndHeader.fileHTML[1] = result[1];
+								}
+								this.save();
+							});
+							modal.open();
+						})
+				);
 		new Setting(this.containerEl)
 			.setName("File export")
-			.setDesc("Whether the HTML should be exported to a file.")
+			.setDesc("Whether the HTML should be exported to a file. The data-heading class is needed for anchor links.")
 			.addToggle(toggle => {
 				toggle.setValue(this.activeProfileData.exportFile);
 				toggle.onChange(async value => {
@@ -451,6 +573,45 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 					});
 				});
 			}
+
+			//Toggle for vault tree export
+			new Setting(this.containerEl)
+			.setName("Keep vault path structure")
+			.setDesc(
+				"Whether the vault structure should be mirrored into the output path."
+			)
+			.addToggle(toggle => {
+				toggle.setValue(this.activeProfileData.isExportVaultPaths);
+				toggle.onChange(async value => {
+					if (value) {
+						this.activeProfileData.isExportVaultPaths = true;
+						this.save();
+						this.display();
+					} else {
+						this.activeProfileData.isExportVaultPaths = false;
+						this.save();
+						this.display();
+					}
+				});
+			});
+
+			//Path for picture export
+			const htmlPicturePathInput = new Setting(this.containerEl);
+			htmlPicturePathInput.setName("Filepath to export HTML file pictures to");
+			htmlPicturePathInput.setDesc("The file path to export pictures belonging to the html to. An empty field will save the pictures into the html file filepath. Please make sure your input is correct.");
+			if (this.activeProfileData.exportFile) {
+				htmlPicturePathInput.addText(text => {
+					text.inputEl.style.minWidth = "40ch";
+					text.setPlaceholder("Enter picture path...");
+					text.setValue(this.activeProfileData.htmlPictureExportFilePath);
+					text.inputEl.addEventListener("change", () => {
+						this.activeProfileData.htmlPictureExportFilePath = text.inputEl.value;
+						this.save();
+					});
+				});
+			}
+
+
 		}
 
 		//Toggle for dirty export
@@ -656,34 +817,6 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 
 			//Header and footer text
 			new Setting(containerEl).setHeading().setName("Detailed export rules");
-			new Setting(containerEl)
-				.setName("Header and footers for HTML")
-				.setDesc(
-					`The exported HTML is stripped to the core. This allows you to add text before and after the HTML (like body tags and style tags). Make sure it is valid HTML.`
-				)
-				.addButton(button =>
-					button
-						.setIcon("file-code")
-						.setTooltip("Add header and footer")
-						.onClick(() => {
-							let arrayForModal: string[][] = this.activeProfileData.rulesForRegex;
-							if (arrayForModal === undefined) {
-								arrayForModal = this._activeProfileData.rulesForRegex;
-							}
-							// Create new modal
-							const modal = new FooterHeaderModal(this.app, this.activeProfileData, result => {
-								// Store the result (tuple of two strings) in the array
-								if (result[0]) {
-									this.activeProfileData.footerAndHeader[0] = result[0];
-								}
-								if (result[1]) {
-									this.activeProfileData.footerAndHeader[1] = result[1];
-								}
-								this.save();
-							});
-							modal.open();
-						})
-				);
 
 			//Toggle for internal link resolution
 			new Setting(this.containerEl)
@@ -1011,6 +1144,37 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 					});
 				// standard settings foundry folder
 				if (this.activeProfileData.foundrySettingsUsed) {
+
+			new Setting(containerEl)
+				.setName("Header and footers for Foundry HTML export")
+				.setDesc(
+					`The exported HTML is stripped to the core. This allows you to add text before and after the HTML (like body tags and style tags). Make sure it is valid HTML.`
+				)
+				.addButton(button =>
+					button
+						.setIcon("file-code")
+						.setTooltip("Add header and footer")
+						.onClick(() => {
+							/*
+							let arrayForModal: string[][] = this.activeProfileData.rulesForRegex;
+							if (arrayForModal === undefined) {
+								arrayForModal = this._activeProfileData.rulesForRegex;
+							}*/
+							// Create new modal
+							const modal = new FooterHeaderModal(this.app, this.activeProfileData.footerAndHeader.foundryHTML[0],this.activeProfileData.footerAndHeader.foundryHTML[1], result => {
+								// Store the result (tuple of two strings) in the array
+								if (result[0]) {
+									this.activeProfileData.footerAndHeader.foundryHTML[0] = result[0];
+								}
+								if (result[1]) {
+									this.activeProfileData.footerAndHeader.foundryHTML[1] = result[1];
+								}
+								this.save();
+							});
+							modal.open();
+						})
+				);
+
 					new Setting(this.containerEl)
 						.setName("Foundry folder")
 						.setDesc("Sets the standard Foundry VTT export folder.")
@@ -1049,27 +1213,170 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 								this.save();
 							});
 						});
-				//standard settings foundry frontmatter writeback
+					
+					new Setting(containerEl).setHeading().setName("Frontmatter settings and usage");
 					new Setting(this.containerEl)
-						.setName("Obsidian frontmatter usage and Foundry writeback")
+						.setName("Obsidian frontmatter UUID")
 						.setDesc(
-							"If set frontmatter will be used first and then standard export settings and then hardcoded defaults. Also Foundry informations will be written into the frontmatter after Foundry import."
+							"If set your Obsidian notes will get an Obsidian UUID after first import into foundry."
 						)
 						.addToggle(toggle => {
-							toggle.setValue(this.activeProfileData.foundryWriteFrontmatter);
+							toggle.setValue(this.activeProfileData.ObsidianWriteFrontmatter);
 							toggle.onChange(async value => {
 								if (value) {
-									this.activeProfileData.foundryWriteFrontmatter = true;
+									this.activeProfileData.ObsidianWriteFrontmatter = true;
 									this.save();
 									this.display();
 								} else {
-									this.activeProfileData.foundryWriteFrontmatter = false;
+									this.activeProfileData.ObsidianWriteFrontmatter = false;
+									this.save();
+									this.display();
+								}
+							});
+						});
+					//SECTION foundry frontmatter settings
+				//standard settings foundry frontmatter writeback
+					new Setting(this.containerEl)
+						.setName("Foundry writeback options")
+						.setDesc(
+							"If set you can define which frontmatter will be written to your note and used first. Else the standard export settings and then the hardcoded defaults will be used."
+						)
+						.addToggle(toggle => {
+							toggle.setValue(this.activeProfileData.foundryFrontmatterWriteBack.isWriteBack);
+							toggle.onChange(async value => {
+								if (value) {
+									this.activeProfileData.foundryFrontmatterWriteBack.isWriteBack = true;
+									this.save();
+									this.display();
+								} else {
+									this.activeProfileData.foundryFrontmatterWriteBack.isWriteBack = false;
 									this.save();
 									this.display();
 								}
 							});
 						});
 					
+					if (this.activeProfileData.foundryFrontmatterWriteBack.isWriteBack){
+					new Setting(this.containerEl)
+						.setName("Foundry folder writeback option")
+						.setDesc(
+							"If set the foundry folder will be written back into your frontmatter after export if not allready set. The frontmatter will be used first then the standard export settings and then the hardcoded defaults will be used."
+						)
+						.addToggle(toggle => {
+							toggle.setValue(this.activeProfileData.foundryFrontmatterWriteBack.Folder);
+							toggle.onChange(async value => {
+								if (value) {
+									this.activeProfileData.foundryFrontmatterWriteBack.Folder = true;
+									this.save();
+									this.display();
+								} else {
+									this.activeProfileData.foundryFrontmatterWriteBack.Folder = false;
+									this.save();
+									this.display();
+								}
+							});
+						});
+					new Setting(this.containerEl)
+						.setName("Foundry journal writeback option")
+						.setDesc(
+							"If set the foundry journal will be written back into your frontmatter after export if not allready set. The frontmatter will be used first then the standard export settings and then the hardcoded defaults will be used."
+						)
+						.addToggle(toggle => {
+							toggle.setValue(this.activeProfileData.foundryFrontmatterWriteBack.Journal);
+							toggle.onChange(async value => {
+								if (value) {
+									this.activeProfileData.foundryFrontmatterWriteBack.Journal = true;
+									this.save();
+									this.display();
+								} else {
+									this.activeProfileData.foundryFrontmatterWriteBack.Journal = false;
+									this.save();
+									this.display();
+								}
+							});
+						});
+
+						new Setting(this.containerEl)
+						.setName("Foundry page writeback option")
+						.setDesc(
+							"If set the foundry page will be written back into your frontmatter after export if not allready set. The frontmatter will be used first then the standard export settings and then the hardcoded defaults will be used."
+						)
+						.addToggle(toggle => {
+							toggle.setValue(this.activeProfileData.foundryFrontmatterWriteBack.Page);
+							toggle.onChange(async value => {
+								if (value) {
+									this.activeProfileData.foundryFrontmatterWriteBack.Page = true;
+									this.save();
+									this.display();
+								} else {
+									this.activeProfileData.foundryFrontmatterWriteBack.Page = false;
+									this.save();
+									this.display();
+								}
+							});
+						});
+
+						new Setting(this.containerEl)
+						.setName("Foundry page title writeback option")
+						.setDesc(
+							"If set the foundry folder will be written back into your frontmatter after export if not allready set. The frontmatter will be used first then the standard export settings and then the hardcoded defaults will be used."
+						)
+						.addToggle(toggle => {
+							toggle.setValue(this.activeProfileData.foundryFrontmatterWriteBack.PageTitle);
+							toggle.onChange(async value => {
+								if (value) {
+									this.activeProfileData.foundryFrontmatterWriteBack.PageTitle = true;
+									this.save();
+									this.display();
+								} else {
+									this.activeProfileData.foundryFrontmatterWriteBack.PageTitle = false;
+									this.save();
+									this.display();
+								}
+							});
+						});
+
+						new Setting(this.containerEl)
+						.setName("Foundry picture path writeback option")
+						.setDesc(
+							"If set the foundry picture path will be written back into your frontmatter after export if not allready set. The frontmatter will be used first then the standard export settings and then the hardcoded defaults will be used."
+						)
+						.addToggle(toggle => {
+							toggle.setValue(this.activeProfileData.foundryFrontmatterWriteBack.PicturePath);
+							toggle.onChange(async value => {
+								if (value) {
+									this.activeProfileData.foundryFrontmatterWriteBack.PicturePath = true;
+									this.save();
+									this.display();
+								} else {
+									this.activeProfileData.foundryFrontmatterWriteBack.PicturePath = false;
+									this.save();
+									this.display();
+								}
+							});
+						});
+
+						new Setting(this.containerEl)
+						.setName("Foundry UUID writeback options")
+						.setDesc(
+							"If set the foundry UUID will be written back into your frontmatter after export if not allready set. The frontmatter will be used first then the standard export settings and then the hardcoded defaults will be used."
+						)
+						.addToggle(toggle => {
+							toggle.setValue(this.activeProfileData.foundryFrontmatterWriteBack.UUID);
+							toggle.onChange(async value => {
+								if (value) {
+									this.activeProfileData.foundryFrontmatterWriteBack.UUID = true;
+									this.save();
+									this.display();
+								} else {
+									this.activeProfileData.foundryFrontmatterWriteBack.UUID = false;
+									this.save();
+									this.display();
+								}
+							});
+						});
+
+					}
 						/* disabled for now needs to be implemented
 					new Setting(containerEl)
 					.setName("Picture folder rules")
@@ -1261,6 +1568,8 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 							jsCode: oldProfileCollection[profileName]?.jsCode ?? DEFAULT_SETTINGS.default.jsCode,
 							exportDirty: oldProfileCollection[profileName]?.exportDirty ?? DEFAULT_SETTINGS.default.exportDirty,
 							exportFile: oldProfileCollection[profileName]?.exportFile ?? DEFAULT_SETTINGS.default.exportFile,
+							isExportVaultPaths: oldProfileCollection[profileName]?.isExportVaultPaths ?? DEFAULT_SETTINGS.default.isExportVaultPaths,
+							htmlPictureExportFilePath: oldProfileCollection[profileName]?.htmlPictureExportFilePath ?? DEFAULT_SETTINGS.default.htmlPictureExportFilePath,
 							exportClipboard: oldProfileCollection[profileName]?.exportClipboard ?? DEFAULT_SETTINGS.default.exportClipboard,
 							exportFoundry: oldProfileCollection[profileName]?.exportFoundry ?? DEFAULT_SETTINGS.default.exportFoundry,
 							internalLinkResolution: oldProfileCollection[profileName]?.internalLinkResolution ?? DEFAULT_SETTINGS.default.internalLinkResolution,
@@ -1277,13 +1586,26 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 							foundryClientId: oldProfileCollection[profileName]?.foundryClientId ?? DEFAULT_SETTINGS.default.foundryClientId,
 							foundryIP: oldProfileCollection[profileName]?.foundryIP ?? DEFAULT_SETTINGS.default.foundryIP,
 							excludeFoldersByregex: oldProfileCollection[profileName]?.excludeFoldersByregex ?? DEFAULT_SETTINGS.default.excludeFoldersByregex,
-							footerAndHeader: [oldProfileCollection[profileName]?.footerAndHeader[0] ?? DEFAULT_SETTINGS.default.footerAndHeader[0], oldProfileCollection[profileName]?.footerAndHeader[1] ?? DEFAULT_SETTINGS.default.footerAndHeader[1]],
+							footerAndHeader:{
+								clipboard: [oldProfileCollection[profileName]?.footerAndHeader.clipboard[0] ?? DEFAULT_SETTINGS.default.footerAndHeader.clipboard[0], oldProfileCollection[profileName]?.footerAndHeader.clipboard[1] ?? DEFAULT_SETTINGS.default.footerAndHeader.clipboard[1]],
+								fileHTML: [oldProfileCollection[profileName]?.footerAndHeader.fileHTML[0] ?? DEFAULT_SETTINGS.default.footerAndHeader.fileHTML[0], oldProfileCollection[profileName]?.footerAndHeader.fileHTML[1] ?? DEFAULT_SETTINGS.default.footerAndHeader.fileHTML[1]],
+								foundryHTML: [oldProfileCollection[profileName]?.footerAndHeader.foundryHTML[0] ?? DEFAULT_SETTINGS.default.footerAndHeader.foundryHTML[0], oldProfileCollection[profileName]?.footerAndHeader.foundryHTML[1] ?? DEFAULT_SETTINGS.default.footerAndHeader.foundryHTML[1]],
+							},
 							foundrySettingsUsed: oldProfileCollection[profileName]?.foundrySettingsUsed ?? DEFAULT_SETTINGS.default.foundrySettingsUsed,
 							foundryFolder: oldProfileCollection[profileName]?.foundryFolder ?? DEFAULT_SETTINGS.default.foundryFolder,
 							foundryJournal: oldProfileCollection[profileName]?.foundryJournal ?? DEFAULT_SETTINGS.default.foundryJournal,
 							foundryPicturePath: oldProfileCollection[profileName]?.foundryPicturePath ?? DEFAULT_SETTINGS.default.foundryPicturePath,
 							foundryMacroLinkingRun: oldProfileCollection[profileName]?.foundryMacroLinkingRun ?? DEFAULT_SETTINGS.default.foundryMacroLinkingRun,
-							foundryWriteFrontmatter: oldProfileCollection[profileName]?.foundryWriteFrontmatter ?? DEFAULT_SETTINGS.default.foundryWriteFrontmatter,
+							ObsidianWriteFrontmatter: oldProfileCollection[profileName]?.ObsidianWriteFrontmatter ?? DEFAULT_SETTINGS.default.ObsidianWriteFrontmatter,
+							foundryFrontmatterWriteBack:{		
+								isWriteBack: oldProfileCollection[profileName]?.foundryFrontmatterWriteBack?.isWriteBack ?? DEFAULT_SETTINGS.default?.foundryFrontmatterWriteBack?.isWriteBack,
+								Folder: oldProfileCollection[profileName]?.foundryFrontmatterWriteBack?.Folder ?? DEFAULT_SETTINGS.default?.foundryFrontmatterWriteBack?.Folder,
+								Journal: oldProfileCollection[profileName]?.foundryFrontmatterWriteBack?.Journal ?? DEFAULT_SETTINGS.default?.foundryFrontmatterWriteBack?.Journal,
+								PageTitle: oldProfileCollection[profileName]?.foundryFrontmatterWriteBack?.PageTitle ?? DEFAULT_SETTINGS.default?.foundryFrontmatterWriteBack?.PageTitle,
+								Page: oldProfileCollection[profileName]?.foundryFrontmatterWriteBack?.Page ?? DEFAULT_SETTINGS.default?.foundryFrontmatterWriteBack?.Page,
+								PicturePath: oldProfileCollection[profileName]?.foundryFrontmatterWriteBack?.PicturePath ?? DEFAULT_SETTINGS.default?.foundryFrontmatterWriteBack?.PicturePath,
+								UUID: oldProfileCollection[profileName]?.foundryFrontmatterWriteBack?.UUID ?? DEFAULT_SETTINGS.default?.foundryFrontmatterWriteBack?.UUID,
+							}
 						};
 				}
 				debug.log("Migration completed.Migrated to new profile settings: ",newProfileCollection);
@@ -1554,15 +1876,15 @@ export class jsCodeModal extends Modal {
 }
 
 export class FooterHeaderModal extends Modal {
-	private header: string = "";
-	private footer: string = "";
+	private _header: string = "";
+	private _footer: string = "";
 	private onSubmit: (result: [string, string]) => void;
-	private _settings: MarkdownToFoundrySettings;
 
-	constructor(app: App, settings: MarkdownToFoundrySettings, onSubmit: (result: [string, string]) => void) {
+	constructor(app: App, header: string, footer: string, onSubmit: (result: [string, string]) => void) {
 		super(app);
 		this.onSubmit = onSubmit;
-		this._settings = settings;
+		this._header = header;
+		this._footer = footer;
 	}
 	onOpen() {
 		const { contentEl } = this;
@@ -1570,10 +1892,10 @@ export class FooterHeaderModal extends Modal {
 		// First text area
 		new Setting(contentEl).setName("Header information ").addTextArea(textarea => {
 			textarea.inputEl.rows = 12;
-			textarea.inputEl.cols = 50;
-			textarea.setValue(this._settings.footerAndHeader[0]);
+			textarea.inputEl.cols = 40;
+			textarea.setValue(this._header);//(this._settings.footerAndHeader[0]);
 			textarea.onChange(value => {
-				this.header = value;
+				this._header = value;
 			});
 		});
 
@@ -1581,10 +1903,10 @@ export class FooterHeaderModal extends Modal {
 
 		new Setting(contentEl).setName("Footer information").addTextArea(textarea => {
 			textarea.inputEl.rows = 12;
-			textarea.inputEl.cols = 50;
-			textarea.setValue(this._settings.footerAndHeader[1]);
+			textarea.inputEl.cols = 40;
+			textarea.setValue(this._footer)//(this._settings.footerAndHeader[1]);
 			textarea.onChange(value => {
-				this.footer = value;
+				this._footer = value;
 			});
 		});
 
@@ -1595,7 +1917,7 @@ export class FooterHeaderModal extends Modal {
 				.setCta()
 				.onClick(() => {
 					this.close();
-					this.onSubmit([this.header, this.footer]);
+					this.onSubmit([this._header, this._footer]);
 				})
 		);
 	}

@@ -1,4 +1,4 @@
-import { cleanHtml, replacePictureLinks } from "./html-cleaner";
+import { cleanHtml, replacePictureLinks,replaceHrefPaths } from "./html-cleaner";
 import { Foundry, FoundryHtml, generateIdForFile } from "./foundry";
 import {VERSION_CONSTANTS } from "./versionConstant";
 import {
@@ -15,7 +15,8 @@ import {
 	normalizePath,
 	FileSystemAdapter,
 } from "obsidian";
-import { writeFileOnWindows, showBrowserNotification, ObsidianPicture,debug } from "./utils";
+import { showBrowserNotification, ObsidianPicture,debug,createRelativePath, buildPictureUploadList } from "./utils";
+import { writeToFilesystem, writeToFilesystem_Pictures } from "./utils-file"
 import { MarkdownToFoundrySettings, MarkdownToFoundrySettingsTab as MarkdownToFoundrySettingsTab } from "./settings";
 
 export const MARKDOWN_TO_FOUNDRY_ICON = 
@@ -249,10 +250,50 @@ component	Component	The parent component to manage the lifecycle of the rendered
 				foundryLinks: [],
 				obsidianFileObj: this.activeFile,
 				obsidianUUID: "",
+				obsidianRelPath:"",
 			};
-			let html = "";
+			let cleanedHTML = "";
+			let dirtyHTML = ""
+			let foundryPicturePath = "assets/pictures";
+			if (file) {
+			if (settings.htmlExportFilePath || settings.foundrySettingsUsed){
+				try {
+			
+			//build the picture list to be uploaded and the paths to which directory they are uploaded
+			// TODO: for batch ObsidianPictureCollection should probably become a set which collects all picture collections of the page instances
 
-			// =======FOUNDRY Export INIT ================================================================================================
+									if (settings.foundrySettingsUsed) {
+							// 'file' is a TFile object representing the note
+							foundryPicturePath = settings.foundryPicturePath || "assets/pictures"
+							if (settings.foundryFrontmatterWriteBack.isWriteBack) {
+								await this.app.fileManager.processFrontMatter(file, frontmatter => {
+									foundryPicturePath =
+										frontmatter["VTT_PicturePath"] || Foundry.settings.foundryPicturePath || "assets/pictures";
+								});
+							}
+						}
+
+			debug.log("Picture list build starts")
+			obsidianPictureList = await buildPictureUploadList(
+				NodeHtml,
+				this.app,
+				file,
+				foundryPicturePath
+			); //build the picture list to be uploaded and the paths to which directory they are uploaded
+				} catch (error) {
+						// Extract a safe error message
+						let message = "Unknown error";
+						if (error instanceof Error) {
+							message = error.message;
+						} else {
+							message = String(error);
+						}
+						// Show a notice in Obsidian with the error message
+						new Notice(`Error: ${message}`, 5000); // 5000 ms = 5 seconds duration
+						showBrowserNotification("Error: ", { body: message }); //TODO: decide if both messages make sense or just use one and which one of the should stay then
+					}}}
+
+			// =======(FOUNDRY) Export INIT ================================================================================================
 			if (settings.exportFoundry && settings.exportDirty === false) {
 				
 				debug.log("Foundry export has started")
@@ -269,26 +310,30 @@ component	Component	The parent component to manage the lifecycle of the rendered
 
 						//TOOD: Put this into the init function of the Foundry class 
 						// and/or move it also into the instance of a foundry page object for batch file because frontmatter might change for each page instance
-						let picturePath = "assets/pictures";
+						
+						debug.log("Foundry Init was started")
+						/*
 						if (Foundry.settings.foundrySettingsUsed) {
 							// 'file' is a TFile object representing the note
 							picturePath = Foundry.settings.foundryPicturePath || "assets/pictures"
-							if (Foundry.settings.foundryWriteFrontmatter) {
-								await Foundry.app.fileManager.processFrontMatter(this.activeFile, frontmatter => {
+							if (Foundry.settings.foundryFrontmatterWriteBack.isWriteBack) {
+								await Foundry.app.fileManager.processFrontMatter(file, frontmatter => {
 									picturePath =
 										frontmatter["VTT_PicturePath"] || Foundry.settings.foundryPicturePath || "assets/pictures";
 								});
 							}
-						}
+						}*/
 						//build the picture list to be uploaded and the paths to which directory they are uploaded
 						// TODO: for batch ObsidianPictureCollection should probably become a set which collects all picture collections of the page instances
-						obsidianPictureList = await Foundry.buildPictureUploadList(
-							NodeHtml,
-							this.app,
-							this.activeFile,
-							picturePath
-						); //build the picture list to be uploaded and the paths to which directory they are uploaded
+						//console.log("==Picture List build starts")
+						//obsidianPictureList = await Foundry.buildPictureUploadList(
+					//		NodeHtml,
+					//		this.app,
+					//		this.activeFile,
+					//		picturePath
+					//	); //build the picture list to be uploaded and the paths to which directory they are uploaded
 						Foundry.ObsidianPictureCollection = obsidianPictureList; //Maybe not necessary anymore need to make function of building picture obsidian and not foundry specific
+						
 					} catch (error) {
 						// Extract a safe error message
 						let message = "Unknown error";
@@ -315,10 +360,10 @@ component	Component	The parent component to manage the lifecycle of the rendered
 					debug.log("Exporting dirty HTML to clipboard");
 				}
 				// if the user wants to export the dirty HTML, we just copy the result of the render
-				html = this.copyResult?.innerHTML ?? "";
+				dirtyHTML = this.copyResult?.innerHTML ?? "";
 				if (settings.exportClipboard) {
 					navigator.clipboard
-						.writeText(this.copyResult?.innerHTML ?? "")
+						.writeText(dirtyHTML ?? "")
 						.then(() => new Notice("Dirty HTML copied to the clipboard", 3500))
 						.catch(() => new Notice("Couldn't copy HTML to the clipboard", 3500))
 						.finally(() => this.endCopyProcess());
@@ -331,11 +376,13 @@ component	Component	The parent component to manage the lifecycle of the rendered
 				this.copyInProgressModal.close();
 
 				foundryHtml = await cleanHtml(this.copyResult as HTMLElement, settings, this.activeFile);
-				html = foundryHtml.html; // get the cleaned html from the tempHtml object
+				
+				cleanedHTML = foundryHtml.html; // get the cleaned html from the tempHtml object
+				let clipboardHTML = settings.footerAndHeader.clipboard[0] + cleanedHTML + settings.footerAndHeader.clipboard[1];
 				//html = settings.footerAndHeader[0] + html + settings.footerAndHeader[1]; //let us add additional html informations again at the end of rendering AND cleaning if desired
 				if (settings.exportClipboard) {
 					navigator.clipboard
-						.writeText(html)
+						.writeText(clipboardHTML)
 						.then(() => new Notice("Cleaned HTML copied to the clipboard", 3500))
 						.catch(() => new Notice("Couldn't copy html to the clipboard", 3500))
 						.finally(() => this.endCopyProcess());
@@ -345,7 +392,8 @@ component	Component	The parent component to manage the lifecycle of the rendered
 			//Clippboard EXPORT and HTML cleaning END ====================================================================
 
 			// =======FOUNDRY Export PAGES ================================================================================================
-			if (settings.exportFoundry && settings.exportDirty === false && Foundry.clientId !== "") {
+			if (settings.exportFoundry && settings.exportDirty === false) {
+				if (Foundry.clientId !== ""){
 				
 				debug.log("Exporting HTML to Foundry");
 				
@@ -353,7 +401,7 @@ component	Component	The parent component to manage the lifecycle of the rendered
 				if (foundryHtml.obsidianFileObj) {
 					try {
 						// adjust file paths to Foundry standards in html
-						if (settings.foundryWriteFrontmatter) {
+						if (settings.ObsidianWriteFrontmatter) {
 							foundryHtml.obsidianUUID = generateIdForFile(this.app, foundryHtml.obsidianFileObj); //generate a new UUID for the current note/html if not already set in the frontmatter this allows to link notes and links
 						} else {foundryHtml.obsidianUUID = ""}
 						if (foundryHtml.foundryLinks.length > 0) {
@@ -364,8 +412,9 @@ component	Component	The parent component to manage the lifecycle of the rendered
 						}
 
 						//replace picture links in html
+						//let content = settings.footerAndHeader.foundryHTML[0] + foundryHtml.html + settings.footerAndHeader.foundryHTML[1];
 						let content = replacePictureLinks(foundryHtml.html, settings, obsidianPictureList);
-						foundryHtml.html = content; // set the picture link adjusted html to the foundryHtml object
+						foundryHtml.html = settings.footerAndHeader.foundryHTML[0] + content + settings.footerAndHeader.foundryHTML[1]; // set the picture link adjusted html to the foundryHtml object
 
 						// time to create a page object for the foundry API which holds the html and all necessary information for post processing
 						// the html and to upload the page to foundry
@@ -407,44 +456,88 @@ component	Component	The parent component to manage the lifecycle of the rendered
 					new Notice(`Error: The specified Obsidian file could not be found`, 5000); // 5000 ms = 5 seconds duration
 					showBrowserNotification("Error: ", { body: "The specified Obsidian file could not be found" });
 				}
-			}
+			}}
 			//FOUNDRY EXPORT PAGES END ================================================================================================================================
 
 			// FILE EXPORT START ======================================================================================================================
 			// Start HTML export if file export is selected
 			if (settings.exportFile) {
 				
-				debug.log("Export to the file system takes place");
-				
+				debug.log("Export to the file system takes place - with the picture list of:",obsidianPictureList);
 				// Content to save
-				const content = foundryHtml.html;
-
+				let exportContent=""
+				if (settings.exportDirty) {
+					exportContent = dirtyHTML //foundryHtml.html; //write html which has no foundry replacements or html which is just cleaned html!!
+				} else {
+					
+					exportContent = settings.footerAndHeader.fileHTML[0] + cleanedHTML + settings.footerAndHeader.fileHTML[1];
+					
+				}
 				//Get the vault path which is the root directory of the Obsidian vault
 				let vaultPath = "";
 				const adapter = this.app.vault.adapter;
 				if (adapter instanceof FileSystemAdapter) {
-					vaultPath = adapter.getBasePath();
+					vaultPath = adapter.getBasePath(); // TODO: Check if vaultPath is ever used
 				}
 				let fileName = this.activeFile?.basename ?? ""; //this returns the file name without the extension
 				const htmlFileName = fileName + ".html"; // append the .html extension to the file name
+
 
 				//returns the platform the plugin is running on - can be linux,darwin,win32
 				const platform = process.platform;
 				// TODO: Check for other platforms and export to them - needs to build the file paths correctly
 				const Schalter: boolean = true; // TODO: this is a switch to check if the file should be written to the vault or to a specific path on Windows - for now hardcoded to only go to a path outside of the vault
 				// the idea is to export to a vault path and create it if file export is set to true
-				if (platform === "win32" && Schalter) {
+				if (platform === "win32" || platform === "linux" || platform === "darwin" && Schalter) {
 					// Windows specific code}
+					let isVaultStructure = false
 					if (settings.htmlExportFilePath !== "") {
-						writeFileOnWindows(settings.htmlExportFilePath, htmlFileName, html,settings) //TODO: decide if settings or activeprofiledata is better here
-							.then(() => {
-								new Notice("HTML file created successfully", 3500);
-							})
-							.catch(error => {
-								new Notice("Error creating HTML file: " + error, 3500);
-							});
-					}
-				} else {
+						let exportFilePath = settings.htmlExportFilePath
+						if(settings.isExportVaultPaths){
+							isVaultStructure = true;
+							exportFilePath = settings.htmlExportFilePath + createRelativePath(foundryHtml.obsidianFileObj)
+						}
+
+
+
+
+						try {
+						//&& obsidianPictureList.length>0
+						if (!settings.exportDirty){
+						exportContent = replaceHrefPaths(settings.htmlExportFilePath,exportContent,foundryHtml.foundryLinks,isVaultStructure)
+						const writePictureResult = await writeToFilesystem_Pictures(exportFilePath,obsidianPictureList,exportContent,settings) //TODO: decide if settings or activeprofiledata is better here						
+						exportContent = writePictureResult
+						}
+						/*
+						if (writePictureResult.success) {
+							new Notice("HTML file exported successfully to the filesystem", 3500)
+							debug.log(`File was written successfully ${settings.htmlExportFilePath}${htmlFileName}`)
+							}else {
+							debug.log("Error:", writePictureResult.error);	
+						}
+						*/
+
+						} catch (error) {
+							new Notice("Error creating HTML file: " + error, 3500);
+        					debug.log('Unexpected error:', error);
+    					}
+
+						try {
+						const writeResult = await writeToFilesystem(exportFilePath, htmlFileName, exportContent) //TODO: decide if settings or activeprofiledata is better here
+						
+						if (writeResult.success) {
+							new Notice("HTML file exported successfully to the filesystem", 3500)
+							debug.log(`File was written successfully ${settings.htmlExportFilePath}${htmlFileName}`)
+							}else {
+							debug.log("Error:", writeResult.error);	
+						}
+
+						} catch (error) {
+							new Notice("Error creating HTML file: " + error, 3500);
+        					debug.log('Unexpected error:', error);
+    					}
+
+				}} else {
 					// File path within the vault
 					const filePath = normalizePath(fileName);
 					// Check if file exists
@@ -455,10 +548,10 @@ component	Component	The parent component to manage the lifecycle of the rendered
 
 					if (existingFile instanceof TFile) {
 						// If file exists, modify it
-						await this.app.vault.modify(existingFile, content);
+						await this.app.vault.modify(existingFile, exportContent);
 					} else {
 						// If file doesn't exist, create it
-						await this.app.vault.create(filePath, content);
+						await this.app.vault.create(filePath, exportContent);
 					}
 				}
 			}
