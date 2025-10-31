@@ -328,7 +328,7 @@ For Foundry VTT we need a "section" tag instead of a div tag. So we change the t
 
 The rule fields are filled with:   
 **Field1:** div[data-callout="secret"]     
-**Field2:** secret   
+**Field2:** section   
 
 We use the query selector div[data-callout="secret"] which will trigger on every div with an attribute data-callout="secret"
 and change each div which matches to a "section" tag.   
@@ -669,6 +669,7 @@ You can also use it to generate a secretID if you need it for any reason.
 ## API Documentation
 
 - Obsidian: [https://github.com/obsidianmd/obsidian-api](https://github.com/obsidianmd/obsidian-api)
+
 
 
 
