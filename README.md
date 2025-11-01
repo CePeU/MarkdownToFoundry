@@ -1,7 +1,11 @@
 
+[![Latest stable Version](https://img.shields.io/github/v/release/CePeU/MarkdownToFoundry?display_name=tag&sort=semver&label=Latest%20stable%20Version)](https://github.com/CePeU/MarkdownToFoundry/releases/latest)![GitHub all releases](https://img.shields.io/github/downloads/CePeU/MarkdownToFoundry/total)[![License](https://img.shields.io/github/license/CePeU/MarkdownToFoundry)](LICENSE)
+[![Latest pre-release](https://img.shields.io/github/v/release/CePeU/MarkdownToFoundry?include_prereleases&sort=semver&label=Latest%20Prerelease)](https://github.com/CePeU/MarkdownToFoundry/releases)![Info](https://img.shields.io/badge/breaking%20profile%20change-8A2BE2)   
+
 # Obsidian MarkdownToFoundry Plugin
 Adjusts and exports the natively as HTML rendered Markdown from Obsidian to Foundry VTT.  
-An [Obsidian](https://obsidian.md) plugin to copy notes as HTML to the clipboard, export as file and/or upload as journal to Foundry VTT.
+An [Obsidian](https://obsidian.md) plugin to copy notes as HTML to the clipboard, export as file and/or upload as journal to Foundry VTT. Also allows for relinking of notes.
+![Import Demo](https://private-user-images.githubusercontent.com/115504753/500303991-bcc855db-aa18-42a6-827e-85b9fabc6b84.gif?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjIwMjI5OTAsIm5iZiI6MTc2MjAyMjY5MCwicGF0aCI6Ii8xMTU1MDQ3NTMvNTAwMzAzOTkxLWJjYzg1NWRiLWFhMTgtNDJhNi04MjdlLTg1YjlmYWJjNmI4NC5naWY_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUxMTAxJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MTEwMVQxODQ0NTBaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT04MTg0OWRiNzg5YTZmMzhiNWZmZDBiYzczNjM2MDQwNDA1YmQwN2IwOGY0OTA5N2M1YjkzZmYwY2QzM2I1MzQ0JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.dLB3BrDOvh7ut-6I31HcBhZPwYa0eZSk9C-rb2Y0jMU)   
 
 ## Why Obsidian and not directly in Foundry
 
@@ -18,7 +22,8 @@ content creators are affected by this if I am informed correctly)
 ### Obsidian pros
 - Better editor (with plugins, undo, formatting etc.)
 - Dataview plugin and now Base    
-(even if you need to use Dataview to utilize my plugin to it's fullest potential! Take a look [NPC overview](https://github.com/CePeU/MarkdownToFoundry/wiki/Demo))
+(even if you need to use Dataview or Datacore and not Base to utilize my plugin to it's fullest potential!   
+Take a look at: [NPC overview](https://github.com/CePeU/MarkdownToFoundry/wiki/Demo))
 - Second window during gameplay (one for Foundry one for Obsidian = more Screen size)
 - note centric + a lot of plugins for that
 - better/easier backup
@@ -76,8 +81,7 @@ I also want to thank the Discord members on the Obsidian plugin-dev channel!
 
 ## What it does
 
-1. Converts the Markdown content of a note to HTML (either selected text or entire document) using Obsidian's markdown renderer. It also gives the option to
-   export to Foundry VTT.
+1. Converts the Markdown content of a note to HTML (either selected text or entire document) using Obsidian's markdown renderer. It also gives the option to export to Foundry VTT.   
 2. Cleans up the HTML from the clutter obsidian (naturally) adds
    - Removes all attributes from tags (a list of attributes to keep can be configured in the settings)
    - Removes all classes (a list of classes to keep can be configured in the settings)
@@ -103,7 +107,7 @@ I also want to thank the Discord members on the Obsidian plugin-dev channel!
 
 ## Tested on
 
-- Desktop (Windows)
+- Desktop (Windows/Linux)
 
 ## Installation
 
@@ -217,7 +221,9 @@ for HTML export.
   - Add a new profile.
   - Remove an existing profile.
 
-You can add new profiles or remove profiles here.
+You can add new profiles or remove profiles here. To remove a profile just use the X on the profile tag.
+A default profile and a Foundry export profile which will export a callout with the "secret" metadata as a   
+secret into Foundry VTT are inlcuded.
 
 ### Clone Profile
 - **Description**: Create a new profile by cloning the settings of the current profile.
@@ -257,7 +263,15 @@ You can add any text you like as header and footer to the output html text. Make
 - Add or edit header and footer content.
 
 You can add any text you like as header and footer to the output html text. Make sure it makes sense!
-(For file export you thus can add style.css and a body tag)    
+(For file export you thus can add style.css and a body tag).   
+
+**EXAMPLE:**   
+A reoccuring question has been how GM informations can be hidden if you use HTML export in Obsidian.
+With this plugin it is easy :) just add:
+`<style>.secret { display: none }</style>`   
+To the header of your HTML file export.
+
+If your players are too tech savy and you need to remove the information then use tag replacement.
 
 ### File Export
 - **Description**: Export the HTML to a file.

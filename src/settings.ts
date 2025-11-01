@@ -956,7 +956,7 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 							.onClick(async () => {
 								const apiKey = this.activeProfileData.foundryApiKey ?? "";
 								let relayServer = this.activeProfileData.foundryRelayServer || DEFAULT_SETTINGS.default.foundryRelayServer || "";
-								//TODO: remove unecessary code for relay server check
+								//TODO: remove unecessary code for relay server check - because you default to hardcoded DEFAULT relay server
 								if (!this.activeProfileData?.foundryRelayServer) {
 									relayServer = DEFAULT_SETTINGS.default.foundryRelayServer;
 								}
@@ -964,6 +964,7 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 									throw new Error("NO relay server specified!");
 								}
 								if (!apiKey) {
+									new Notice("NO API key specified!", 5000);
 									throw new Error("NO API key specified!");
 								}
 								const clientList = await Foundry.apiGet_FoundryClientList(relayServer, apiKey);

@@ -256,13 +256,13 @@ component	Component	The parent component to manage the lifecycle of the rendered
 			let dirtyHTML = ""
 			let foundryPicturePath = "assets/pictures";
 			if (file) {
-			if (settings.htmlExportFilePath || settings.foundrySettingsUsed){
+			if (settings.htmlExportFilePath || settings.exportFoundry){
 				try {
 			
 			//build the picture list to be uploaded and the paths to which directory they are uploaded
 			// TODO: for batch ObsidianPictureCollection should probably become a set which collects all picture collections of the page instances
 
-									if (settings.foundrySettingsUsed) {
+							if (settings.foundrySettingsUsed) {
 							// 'file' is a TFile object representing the note
 							foundryPicturePath = settings.foundryPicturePath || "assets/pictures"
 							if (settings.foundryFrontmatterWriteBack.isWriteBack) {
@@ -295,7 +295,7 @@ component	Component	The parent component to manage the lifecycle of the rendered
 
 			// =======(FOUNDRY) Export INIT ================================================================================================
 			if (settings.exportFoundry && settings.exportDirty === false) {
-				
+				if (settings.foundryApiKey && settings.foundryRelayServer){
 				debug.log("Foundry export has started")
 				
 				//file might needed to be changed or read from an array because so far it is the file of the active editor!!!
@@ -350,7 +350,7 @@ component	Component	The parent component to manage the lifecycle of the rendered
 					new Notice(`Error: The specified Obsidian file could not be found`, 5000); // 5000 ms = 5 seconds duration
 					showBrowserNotification("Error: ", { body: "The specified Obsidian file could not be found" });
 				}
-			}
+			}}
 			//FOUNDRY EXPORT INIT END ================================================================================================================================
 
 			//Clippboard EXPORT AND HTML cleaning ========================================================================
@@ -393,6 +393,7 @@ component	Component	The parent component to manage the lifecycle of the rendered
 
 			// =======FOUNDRY Export PAGES ================================================================================================
 			if (settings.exportFoundry && settings.exportDirty === false) {
+				if (settings.foundryApiKey && settings.foundryRelayServer){
 				if (Foundry.clientId !== ""){
 				
 				debug.log("Exporting HTML to Foundry");
@@ -456,7 +457,7 @@ component	Component	The parent component to manage the lifecycle of the rendered
 					new Notice(`Error: The specified Obsidian file could not be found`, 5000); // 5000 ms = 5 seconds duration
 					showBrowserNotification("Error: ", { body: "The specified Obsidian file could not be found" });
 				}
-			}}
+			}}}
 			//FOUNDRY EXPORT PAGES END ================================================================================================================================
 
 			// FILE EXPORT START ======================================================================================================================
@@ -495,7 +496,8 @@ component	Component	The parent component to manage the lifecycle of the rendered
 						let exportFilePath = settings.htmlExportFilePath
 						if(settings.isExportVaultPaths){
 							isVaultStructure = true;
-							exportFilePath = settings.htmlExportFilePath + createRelativePath(foundryHtml.obsidianFileObj)
+							exportFilePath = normalizePath(settings.htmlExportFilePath +"/"+ createRelativePath(foundryHtml.obsidianFileObj))
+							debug.log("HMTL file export path: ",exportFilePath)
 						}
 
 

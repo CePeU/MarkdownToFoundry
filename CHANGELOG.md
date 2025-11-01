@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.2.1] / 2025-10-30
+
+### Fixed
+- html file export paths without a trailing "/" should now work
+- Readme was adjusted "Field2: section" instead of "Field2:secret"
+- more checks if API Key is available and relay server field is filled before a foundry page export is conducted
+
+
+### Added
+- badges and GIF demo import animation was added to readme 
+
 ## [1.2.0] / 2025-10-30
 
 ### Fixed
