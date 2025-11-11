@@ -372,7 +372,7 @@ export async function toBase64(srcFilePath: string) {
     .then(fr => fr.result as string);
 }
 
-export function replaceHrefPaths(exportFilePath:string,html:string,linkList: FoundryHtmlLinkInformation[],isVaultStructure?:boolean ){
+export function replaceHrefPaths(exportFilePath:string,html:string,linkList: FoundryHtmlLinkInformation[],platform: string,isVaultStructure?:boolean ){
   let targetPath=""
   let adjustedHtml = html;
   let oldHtml = null;
@@ -394,9 +394,20 @@ The replacement string 'id="$1"' puts the (first and only) captured value inside
   for (const link of linkList) {
   targetPath=exportFilePath
      if (isVaultStructure){
-    targetPath = targetPath +  link.linkPath.replace(/\.md$/, '.html');
+    targetPath = normalizePath(targetPath + "/" + link.linkPath.replace(/\.md$/, '.html'));
+    if (platform === "win32"){
+      targetPath = "/"+targetPath
+    }
+    //console.debug("IS Vault Strukture then targetPath: ",targetPath)
+    //console.debug("IS Vault Strukture then link Path: ",link.linkPath)
+    //console.debug("IS Vault Strukture then link Name: ",link.linkFileName.replace(/\.md$/, '.html'))
   } else {
-    targetPath = targetPath + link.linkFileName.replace(/\.md$/, '.html');
+    targetPath = normalizePath(targetPath + "/" + link.linkFileName.replace(/\.md$/, '.html'));
+     if (platform === "win32"){
+      targetPath = "/"+targetPath
+    }
+    //console.debug("NOT Vault Strukture then targetPath: ",targetPath)
+    //console.debug("NOT Vault Strukture then link Path: ",link.linkFileName)
   }
 
             // === Step 1: Handle Anchor (Heading) Links ===

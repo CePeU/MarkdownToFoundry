@@ -8,6 +8,7 @@ import {
 	TextComponent,
 	Notice,
 	addIcon,
+	normalizePath,
 } from "obsidian";
 import MarkdownToFoundry from "./plugin";
 import { isEmpty,debug } from "./utils";
@@ -34,6 +35,7 @@ export interface MarkdownToFoundrySettings {
 	exportClipboard: boolean;
 	internalLinkResolution: boolean;
 	htmlExportFilePath: string; //file path for hmtl export file
+	htmlLinkPath: string;
 	encodePictures: boolean; // Setting if image encoding shall take place
 	removeFrontmatter: boolean; // Setting for removing frontmatter
 	assetSaveRuleset: string[][]; // NOT implemented yet
@@ -96,6 +98,7 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
 		exportFoundry: false,
 		internalLinkResolution: false,
 		htmlExportFilePath: "",
+		htmlLinkPath:"",
 		encodePictures: true, // Default value for image encoding
 		removeFrontmatter: true, // Default value for removing frontmatter
 		foundryApiKey: "",
@@ -219,6 +222,7 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
     exportFoundry: true,
     internalLinkResolution: true,
     htmlExportFilePath: "",
+	htmlLinkPath:"",
     encodePictures: false,
     removeFrontmatter: true,
     foundryApiKey: "",
@@ -264,12 +268,13 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 	private _allProfileData: ProfileSettings; //dataset with all profiles
 	private _activeProfileData: MarkdownToFoundrySettings; //active profile data;
 	private activeProfileName: string; //holds the name of the active profile
+	private platform: string;
 
 	constructor(app: App, plugin: MarkdownToFoundry) {
 		super(app, plugin);
 		this.loadSettings();
 		this.plugin = plugin;
-		
+		this.platform = process.platform;//returns the platform the plugin is running on - can be linux,darwin,win32
 		//this._activeProfileData = this._allProfileData['default'];
 	}
 
@@ -414,6 +419,7 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 							exportFoundry: this.activeProfileData.exportFoundry,
 							internalLinkResolution: this.activeProfileData.internalLinkResolution,
 							htmlExportFilePath: this.activeProfileData.htmlExportFilePath,
+							htmlLinkPath: this.activeProfileData.htmlLinkPath,
 							encodePictures: this.activeProfileData.encodePictures, // Default value for image encoding
 							removeFrontmatter: this.activeProfileData.removeFrontmatter, // Default value for removing frontmatter
 							foundryApiKey: this.activeProfileData.foundryApiKey,
@@ -570,10 +576,32 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 					text.inputEl.addEventListener("change", () => {
 						this.activeProfileData.htmlExportFilePath = text.inputEl.value;
 						this.save();
+						this.display();
 					});
 				});
 			}
 
+			const linkPathInput = new Setting(this.containerEl);
+			linkPathInput.setName("File linking path");
+			linkPathInput.setDesc("The (relative) path the hmtl file links should be linked to. For Windows use the path without the drive letter to get relative drive letter independent linking. If left empty absolute paths will be used. Please make sure your input is correct.");
+			if (this.activeProfileData.exportFile) {
+				linkPathInput.addText(text => {
+					text.inputEl.style.minWidth = "40ch";
+
+					if(this.platform === "win32"){
+						text.setPlaceholder(`${normalizePath(this.activeProfileData.htmlExportFilePath.slice(2))}`);
+					} else {
+						text.setPlaceholder(`${normalizePath(this.activeProfileData.htmlExportFilePath)}`);
+					}
+
+					text.setValue(this.activeProfileData.htmlLinkPath);
+					text.inputEl.addEventListener("change", () => {
+						this.activeProfileData.htmlLinkPath = text.inputEl.value;
+						this.save();
+					});
+				});
+			}	
+			
 			//Toggle for vault tree export
 			new Setting(this.containerEl)
 			.setName("Keep vault path structure")
@@ -1575,6 +1603,7 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 							exportFoundry: oldProfileCollection[profileName]?.exportFoundry ?? DEFAULT_SETTINGS.default.exportFoundry,
 							internalLinkResolution: oldProfileCollection[profileName]?.internalLinkResolution ?? DEFAULT_SETTINGS.default.internalLinkResolution,
 							htmlExportFilePath: oldProfileCollection[profileName]?.htmlExportFilePath ?? DEFAULT_SETTINGS.default.htmlExportFilePath,
+							htmlLinkPath: oldProfileCollection[profileName]?.htmlLinkPath ?? DEFAULT_SETTINGS.default.htmlLinkPath,
 							encodePictures: oldProfileCollection[profileName]?.encodePictures ?? DEFAULT_SETTINGS.default.encodePictures,
 							removeFrontmatter: oldProfileCollection[profileName]?.removeFrontmatter ?? DEFAULT_SETTINGS.default.removeFrontmatter,
 							foundryApiKey: oldProfileCollection[profileName]?.foundryApiKey ?? DEFAULT_SETTINGS.default.foundryApiKey,

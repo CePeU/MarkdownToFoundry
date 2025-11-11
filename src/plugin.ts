@@ -45,10 +45,13 @@ export default class MarkdownToFoundry extends Plugin {
 	private copyResult: HTMLElement | undefined;
 	private activeFile: TFile;
 	public debugMode: boolean = false;
-	
+	private platform: string;
+
 	async onload() {
 		debug.setDebugMode(false); //default is true
 		// add custom icon
+		this.platform = process.platform ?? "";
+
 		addIcon(
 			"markdownToFoundry-icon", MARKDOWN_TO_FOUNDRY_ICON
 		);
@@ -485,11 +488,11 @@ component	Component	The parent component to manage the lifecycle of the rendered
 
 
 				//returns the platform the plugin is running on - can be linux,darwin,win32
-				const platform = process.platform;
+				//const platform = process.platform;
 				// TODO: Check for other platforms and export to them - needs to build the file paths correctly
 				const Schalter: boolean = true; // TODO: this is a switch to check if the file should be written to the vault or to a specific path on Windows - for now hardcoded to only go to a path outside of the vault
 				// the idea is to export to a vault path and create it if file export is set to true
-				if (platform === "win32" || platform === "linux" || platform === "darwin" && Schalter) {
+				if (this.platform === "win32" || this.platform === "linux" || this.platform === "darwin" && Schalter) {
 					// Windows specific code}
 					let isVaultStructure = false
 					if (settings.htmlExportFilePath !== "") {
@@ -497,6 +500,7 @@ component	Component	The parent component to manage the lifecycle of the rendered
 						if(settings.isExportVaultPaths){
 							isVaultStructure = true;
 							exportFilePath = normalizePath(settings.htmlExportFilePath +"/"+ createRelativePath(foundryHtml.obsidianFileObj))
+							//settings.htmlExportFilePath = exportFilePath
 							debug.log("HMTL file export path: ",exportFilePath)
 						}
 
@@ -506,8 +510,12 @@ component	Component	The parent component to manage the lifecycle of the rendered
 						try {
 						//&& obsidianPictureList.length>0
 						if (!settings.exportDirty){
-						exportContent = replaceHrefPaths(settings.htmlExportFilePath,exportContent,foundryHtml.foundryLinks,isVaultStructure)
-						const writePictureResult = await writeToFilesystem_Pictures(exportFilePath,obsidianPictureList,exportContent,settings) //TODO: decide if settings or activeprofiledata is better here						
+							if(settings.htmlLinkPath){
+								exportContent = replaceHrefPaths(settings.htmlLinkPath,exportContent,foundryHtml.foundryLinks,this.platform,isVaultStructure)
+							} else {
+								exportContent = replaceHrefPaths(settings.htmlExportFilePath,exportContent,foundryHtml.foundryLinks,this.platform,isVaultStructure)
+							}
+							const writePictureResult = await writeToFilesystem_Pictures(exportFilePath,obsidianPictureList,exportContent,settings) //TODO: decide if settings or activeprofiledata is better here						
 						exportContent = writePictureResult
 						}
 						/*
@@ -529,7 +537,7 @@ component	Component	The parent component to manage the lifecycle of the rendered
 						
 						if (writeResult.success) {
 							new Notice("HTML file exported successfully to the filesystem", 3500)
-							debug.log(`File was written successfully ${settings.htmlExportFilePath}${htmlFileName}`)
+							debug.log(`File was written successfully to path = ${exportFilePath} with filename = ${htmlFileName}`)
 							}else {
 							debug.log("Error:", writeResult.error);	
 						}
