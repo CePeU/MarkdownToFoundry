@@ -267,11 +267,11 @@ component	Component	The parent component to manage the lifecycle of the rendered
 
 							if (settings.foundrySettingsUsed) {
 							// 'file' is a TFile object representing the note
-							foundryPicturePath = settings.foundryPicturePath || "assets/pictures"
+							foundryPicturePath = settings.foundryPicturePath ?? "assets/pictures"
 							if (settings.foundryFrontmatterWriteBack.isWriteBack) {
 								await this.app.fileManager.processFrontMatter(file, frontmatter => {
 									foundryPicturePath =
-										frontmatter["VTT_PicturePath"] || Foundry.settings.foundryPicturePath || "assets/pictures";
+										frontmatter["VTT_PicturePath"] ?? settings.foundryPicturePath ?? "assets/pictures";
 								});
 							}
 						}

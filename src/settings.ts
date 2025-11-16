@@ -1266,9 +1266,9 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 					//SECTION foundry frontmatter settings
 				//standard settings foundry frontmatter writeback
 					new Setting(this.containerEl)
-						.setName("Foundry writeback options")
+						.setName("Foundry frontmatter first")
 						.setDesc(
-							"If set you can define which frontmatter will be written to your note and used first. Else the standard export settings and then the hardcoded defaults will be used."
+							"If set frontmatter will be used first. Else the standard export settings and then the hardcoded defaults will be used. You also can now set which frontmatter will be written back into your note."
 						)
 						.addToggle(toggle => {
 							toggle.setValue(this.activeProfileData.foundryFrontmatterWriteBack.isWriteBack);
