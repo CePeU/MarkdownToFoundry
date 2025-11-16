@@ -1236,7 +1236,7 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 						.addText(text => {
 							text.inputEl.style.minWidth = "40ch";;
 							text.setPlaceholder("Enter picture path");
-							text.setValue(this.activeProfileData.foundryPicturePath);
+							text.setValue(this.activeProfileData.foundryPicturePath ?? "assets/pictures");
 							text.inputEl.addEventListener("change", () => {
 								this.activeProfileData.foundryPicturePath = text.inputEl.value;
 								this.save();
