@@ -593,9 +593,9 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 					text.inputEl.style.minWidth = "40ch";
 
 					if(this.platform === "win32"){
-						text.setPlaceholder(`${normalizePath(this.activeProfileData.htmlExportFilePath.slice(2))}`);
+						text.setPlaceholder(`/${normalizePath(this.activeProfileData.htmlExportFilePath.slice(2))}`);
 					} else {
-						text.setPlaceholder(`${normalizePath(this.activeProfileData.htmlExportFilePath)}`);
+						text.setPlaceholder(`/${normalizePath(this.activeProfileData.htmlExportFilePath)}`);
 					}
 
 					text.setValue(this.activeProfileData.htmlLinkPath);
@@ -646,31 +646,25 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 
 			const htmlPictureRelativePathInput = new Setting(this.containerEl);
 			htmlPictureRelativePathInput.setName("Relative PICTURE linking path");
-			htmlPictureRelativePathInput.setDesc('The (relative) path the pictures should be linked to. For an empty picture EXPORT file path use "/" to get relative linking. Else use the a sub path of your html export to point to the picture export folder. Leaving this empty will keep using absolute paths. Please make sure your input is correct.');
+			htmlPictureRelativePathInput.setDesc('The (relative) path the pictures should be linked to. For an EMPTY picture EXPORT file path use "./" to get relative linking. Else use the a sub path of your picture export to point to the picture export folder. Leaving this empty will keep using absolute paths. Please make sure your input is correct.');
 			if (this.activeProfileData.exportFile) {
 				htmlPictureRelativePathInput.addText(text => {
 					text.inputEl.style.minWidth = "40ch";
 
-				let remindingRelativePath ="/"
-				//if (this.activeProfileData.htmlPictureRelativeExportFilePath){ // change to relative file paths if they are set
-            		const pictureFileExportPath = normalizePath(this.activeProfileData.htmlPictureExportFilePath); // full path    
-            		const htmlFileExportPath = normalizePath(this.activeProfileData.htmlExportFilePath); //prefix	
-					if (pictureFileExportPath.startsWith(htmlFileExportPath)){
-            			remindingRelativePath = pictureFileExportPath.startsWith(htmlFileExportPath) ? pictureFileExportPath.slice(htmlFileExportPath.length) : pictureFileExportPath; // remaining suffix
-					}
-					if(remindingRelativePath.length === 0){
-						remindingRelativePath ="/"
-					}
-				//}
+				let remindingRelativePath ="./"
+				
+				console.log("=== 0) Was here: ",this.activeProfileData.htmlPictureRelativeExportFilePath)
+				if (this.activeProfileData.htmlPictureExportFilePath){ // change to relative file paths if they are set
+					if(this.platform === "win32"){
+						remindingRelativePath="/"+normalizePath(this.activeProfileData.htmlPictureExportFilePath.slice(2));
+					} else {
+						remindingRelativePath="/"+normalizePath(this.activeProfileData.htmlPictureExportFilePath);
+				}
+				}
 				
 				text.setPlaceholder(`${remindingRelativePath}`);
 
-				/*
-					if(this.platform === "win32"){
-						text.setPlaceholder(`/ or ${normalizePath(this.activeProfileData.htmlPictureExportFilePath.slice(2))}`);
-					} else {
-						text.setPlaceholder(`/ or ${normalizePath(this.activeProfileData.htmlPictureExportFilePath)}`);
-					}*/
+				
 
 					text.setValue(this.activeProfileData.htmlPictureRelativeExportFilePath);
 					text.inputEl.addEventListener("change", () => {

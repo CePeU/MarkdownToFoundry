@@ -43,20 +43,8 @@ export async function writeToFilesystem_Pictures (destinationPath:string,picture
         let finalPicturePath = exportDestinationPath //These are the absolute picture paths
 
 
-        console.log("=== A) exportDestinationPath: ",finalPicturePath)
-        if (settings.htmlPictureRelativeExportFilePath){ // change to relative file paths if they are set
-            /*
-            const pictureFileExportPath = settings.htmlPictureExportFilePath; // full path    
-            const htmlFileExportPath = settings.htmlExportFilePath; //prefix
-            let remindingRelativePath ="./"
-            if (pictureFileExportPath.startsWith(htmlFileExportPath)){
-            remindingRelativePath = pictureFileExportPath.startsWith(htmlFileExportPath) ? pictureFileExportPath.slice(htmlFileExportPath.length) : pictureFileExportPath; // remaining suffix
-            }
-            if(remindingRelativePath.length === 0){
-                remindingRelativePath ="./"
-            } */
-         finalPicturePath = "."+settings.htmlPictureRelativeExportFilePath
-         console.log("=== B) exportDestinationPath: ",finalPicturePath)
+        if (settings.htmlPictureRelativeExportFilePath){ // change to relative picture file paths if they are set
+            finalPicturePath = settings.htmlPictureRelativeExportFilePath
         }
 /*
 You need to parse the embeds again ... maybe do this allready during first cleanup cycle and create a second html
@@ -98,12 +86,15 @@ replacedHTML = safeReplace(replacedHTML, "<a href=currentPicturePathInHtml, full
             
             let fullPicturePath=buildNormalizedPath(finalPicturePath,pictureFileName)
 
-            if (settings.htmlPictureRelativeExportFilePath){ // normalized filepaths to not work for relative paths in a filesystem and will not be resolved correctly
-            // Vom picture absoluten export pfad muss der html absolut pfad abgezogen werden (und das muss ich vorschlag in den settings auch gezeigt werden)
-            // wenn dabei Null an pfad zurückbleibt so muss / daraus gemacht werden. Und es muss immer ein "." am anfang eingefügt werden
-            
-
+            if (settings.htmlPictureRelativeExportFilePath){ 
+            // normalized filepaths to not work for relative paths in a FILESYSTEM and will not be resolved correctly in the function buildNormalizedPath
+            //console.log("=== relative picture Export file path ",settings.htmlPictureRelativeExportFilePath)
+            //console.log("=== test finalPicturePath: + /+Picture: ",finalPicturePath)
+             if(settings.htmlPictureRelativeExportFilePath === "./") {
+                fullPicturePath=finalPicturePath+pictureFileName.replace(/[<>:"/\\|?*]/g, '');
+             } else {
                 fullPicturePath=finalPicturePath+"/"+pictureFileName.replace(/[<>:"/\\|?*]/g, '');
+            }
             }
             //const normalizedPath = fspath.normalize(exportDestinationPath);
             //console.log("==Normalized path:",normalizedPath)
