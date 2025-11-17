@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.2] / 2025-11-17
+
+### Fixed
+- On first export the picture path was not initialiazed correctly for the picture collection (as no foundry object was initialiazed yet)
+
+
+### Added
+- HTML export was enhanced to allow for a wide range of export options to the file system
+- absolute and relative paths for linked .md notes are possible now so one can use XAMPP or other digital garden solutions
+- pictures and files can now be exported into the filesystem either into one path or keeping the vault path structure
+- arbitrary file paths and tree structures should be possible (not extensivly enough tested yet) 
+
 ## [1.2.1] / 2025-10-30
 
 ### Fixed
