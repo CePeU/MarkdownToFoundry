@@ -32,6 +32,7 @@ export interface MarkdownToFoundrySettings {
 	exportFile: boolean;
 	isExportVaultPaths: boolean;
 	htmlPictureExportFilePath:string;
+	htmlPictureRelativeExportFilePath: string;
 	exportClipboard: boolean;
 	internalLinkResolution: boolean;
 	htmlExportFilePath: string; //file path for hmtl export file
@@ -94,6 +95,7 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
 		exportFile: false,
 		isExportVaultPaths: false,
 		htmlPictureExportFilePath:"",
+		htmlPictureRelativeExportFilePath:"",
 		exportClipboard: true,
 		exportFoundry: false,
 		internalLinkResolution: false,
@@ -218,6 +220,7 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
     exportFile: false,
 	isExportVaultPaths: false,
 	htmlPictureExportFilePath:"",
+	htmlPictureRelativeExportFilePath:"",
     exportClipboard: true,
     exportFoundry: true,
     internalLinkResolution: true,
@@ -415,6 +418,7 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 							exportFile: this.activeProfileData.exportFile,
 							isExportVaultPaths: this.activeProfileData.isExportVaultPaths,
 							htmlPictureExportFilePath: this.activeProfileData.htmlPictureExportFilePath,
+							htmlPictureRelativeExportFilePath: this.activeProfileData.htmlPictureRelativeExportFilePath,
 							exportClipboard: this.activeProfileData.exportClipboard,
 							exportFoundry: this.activeProfileData.exportFoundry,
 							internalLinkResolution: this.activeProfileData.internalLinkResolution,
@@ -566,7 +570,7 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 		if (this.activeProfileData.exportFile) {
 			//Toggle for file export
 			const filePathInput = new Setting(this.containerEl);
-			filePathInput.setName("Filepath to export to");
+			filePathInput.setName("File path to export HTML file to");
 			filePathInput.setDesc("The file path to export to. Please make sure your input is correct.");
 			if (this.activeProfileData.exportFile) {
 				filePathInput.addText(text => {
@@ -583,7 +587,7 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 
 			const linkPathInput = new Setting(this.containerEl);
 			linkPathInput.setName("File linking path");
-			linkPathInput.setDesc("The (relative) path the hmtl file links should be linked to. For Windows use the path without the drive letter to get relative drive letter independent linking. If left empty absolute paths will be used. Please make sure your input is correct.");
+			linkPathInput.setDesc("The (relative) path the hmtl file links should be linked to. For Windows use the path without the drive letter to get relative drive letter independent linking. If left empty the absolute export paths will be used. Please make sure your input is correct.");
 			if (this.activeProfileData.exportFile) {
 				linkPathInput.addText(text => {
 					text.inputEl.style.minWidth = "40ch";
@@ -625,7 +629,7 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 
 			//Path for picture export
 			const htmlPicturePathInput = new Setting(this.containerEl);
-			htmlPicturePathInput.setName("Filepath to export HTML file pictures to");
+			htmlPicturePathInput.setName("File path to export PICTURE file to");
 			htmlPicturePathInput.setDesc("The file path to export pictures belonging to the html to. An empty field will save the pictures into the html file filepath. Please make sure your input is correct.");
 			if (this.activeProfileData.exportFile) {
 				htmlPicturePathInput.addText(text => {
@@ -635,9 +639,46 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 					text.inputEl.addEventListener("change", () => {
 						this.activeProfileData.htmlPictureExportFilePath = text.inputEl.value;
 						this.save();
+						this.display();
 					});
 				});
 			}
+
+			const htmlPictureRelativePathInput = new Setting(this.containerEl);
+			htmlPictureRelativePathInput.setName("Relative PICTURE linking path");
+			htmlPictureRelativePathInput.setDesc('The (relative) path the pictures should be linked to. For an empty picture EXPORT file path use "/" to get relative linking. Else use the a sub path of your html export to point to the picture export folder. Leaving this empty will keep using absolute paths. Please make sure your input is correct.');
+			if (this.activeProfileData.exportFile) {
+				htmlPictureRelativePathInput.addText(text => {
+					text.inputEl.style.minWidth = "40ch";
+
+				let remindingRelativePath ="/"
+				//if (this.activeProfileData.htmlPictureRelativeExportFilePath){ // change to relative file paths if they are set
+            		const pictureFileExportPath = normalizePath(this.activeProfileData.htmlPictureExportFilePath); // full path    
+            		const htmlFileExportPath = normalizePath(this.activeProfileData.htmlExportFilePath); //prefix	
+					if (pictureFileExportPath.startsWith(htmlFileExportPath)){
+            			remindingRelativePath = pictureFileExportPath.startsWith(htmlFileExportPath) ? pictureFileExportPath.slice(htmlFileExportPath.length) : pictureFileExportPath; // remaining suffix
+					}
+					if(remindingRelativePath.length === 0){
+						remindingRelativePath ="/"
+					}
+				//}
+				
+				text.setPlaceholder(`${remindingRelativePath}`);
+
+				/*
+					if(this.platform === "win32"){
+						text.setPlaceholder(`/ or ${normalizePath(this.activeProfileData.htmlPictureExportFilePath.slice(2))}`);
+					} else {
+						text.setPlaceholder(`/ or ${normalizePath(this.activeProfileData.htmlPictureExportFilePath)}`);
+					}*/
+
+					text.setValue(this.activeProfileData.htmlPictureRelativeExportFilePath);
+					text.inputEl.addEventListener("change", () => {
+						this.activeProfileData.htmlPictureRelativeExportFilePath = text.inputEl.value;
+						this.save();
+					});
+				});
+			}	
 
 
 		}
@@ -1599,6 +1640,7 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 							exportFile: oldProfileCollection[profileName]?.exportFile ?? DEFAULT_SETTINGS.default.exportFile,
 							isExportVaultPaths: oldProfileCollection[profileName]?.isExportVaultPaths ?? DEFAULT_SETTINGS.default.isExportVaultPaths,
 							htmlPictureExportFilePath: oldProfileCollection[profileName]?.htmlPictureExportFilePath ?? DEFAULT_SETTINGS.default.htmlPictureExportFilePath,
+							htmlPictureRelativeExportFilePath: oldProfileCollection[profileName]?.htmlPictureRelativeExportFilePath ?? DEFAULT_SETTINGS.default.htmlPictureRelativeExportFilePath,
 							exportClipboard: oldProfileCollection[profileName]?.exportClipboard ?? DEFAULT_SETTINGS.default.exportClipboard,
 							exportFoundry: oldProfileCollection[profileName]?.exportFoundry ?? DEFAULT_SETTINGS.default.exportFoundry,
 							internalLinkResolution: oldProfileCollection[profileName]?.internalLinkResolution ?? DEFAULT_SETTINGS.default.internalLinkResolution,

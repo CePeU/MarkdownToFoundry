@@ -26,6 +26,7 @@ function buildNormalizedPath(filePath: string,fileName: string):string {
     return fullPath
 }
 
+// HTML PICTURE PATH export and RELINK og Pictures
 export async function writeToFilesystem_Pictures (destinationPath:string,pictureCollection: ObsidianPicture[],html: string,settings:MarkdownToFoundrySettings):Promise<any>{
         debug.log("writeToFilesystem_Pictures - Picture copy:", pictureCollection);
         // Need to refetch the file list in Foundry! Because this could be a new
@@ -34,13 +35,29 @@ export async function writeToFilesystem_Pictures (destinationPath:string,picture
         // the static variable!!
 
         //Set basenames and export base export paths if for any reason none are available
-
-        let exportDestinationPath = settings.htmlPictureExportFilePath || destinationPath || "";
         
+        let exportDestinationPath = settings.htmlPictureExportFilePath || destinationPath || ""; 
+
         //let exportDestinationName = "Unnamed" + Date.now() + ".jpg";
         let replacedHTML = html || ""
+        let finalPicturePath = exportDestinationPath //These are the absolute picture paths
 
 
+        console.log("=== A) exportDestinationPath: ",finalPicturePath)
+        if (settings.htmlPictureRelativeExportFilePath){ // change to relative file paths if they are set
+            /*
+            const pictureFileExportPath = settings.htmlPictureExportFilePath; // full path    
+            const htmlFileExportPath = settings.htmlExportFilePath; //prefix
+            let remindingRelativePath ="./"
+            if (pictureFileExportPath.startsWith(htmlFileExportPath)){
+            remindingRelativePath = pictureFileExportPath.startsWith(htmlFileExportPath) ? pictureFileExportPath.slice(htmlFileExportPath.length) : pictureFileExportPath; // remaining suffix
+            }
+            if(remindingRelativePath.length === 0){
+                remindingRelativePath ="./"
+            } */
+         finalPicturePath = "."+settings.htmlPictureRelativeExportFilePath
+         console.log("=== B) exportDestinationPath: ",finalPicturePath)
+        }
 /*
 You need to parse the embeds again ... maybe do this allready during first cleanup cycle and create a second html
 or create a collection of embedded links also and not only of picture paths
@@ -79,8 +96,15 @@ replacedHTML = safeReplace(replacedHTML, "<a href=currentPicturePathInHtml, full
             await writeToFilesystem(exportDestinationPath,pictureFileName,"",pictureSourceFilePath)
                 //showBrowserNotification("File copy successfull");
             
-            const fullPath=buildNormalizedPath(exportDestinationPath,pictureFileName)
+            let fullPicturePath=buildNormalizedPath(finalPicturePath,pictureFileName)
 
+            if (settings.htmlPictureRelativeExportFilePath){ // normalized filepaths to not work for relative paths in a filesystem and will not be resolved correctly
+            // Vom picture absoluten export pfad muss der html absolut pfad abgezogen werden (und das muss ich vorschlag in den settings auch gezeigt werden)
+            // wenn dabei Null an pfad zurückbleibt so muss / daraus gemacht werden. Und es muss immer ein "." am anfang eingefügt werden
+            
+
+                fullPicturePath=finalPicturePath+"/"+pictureFileName.replace(/[<>:"/\\|?*]/g, '');
+            }
             //const normalizedPath = fspath.normalize(exportDestinationPath);
             //console.log("==Normalized path:",normalizedPath)
             //const sanitizedFilename = exportDestinationName.replace(/[<>:"/\\|?*]/g, '');
@@ -91,7 +115,7 @@ replacedHTML = safeReplace(replacedHTML, "<a href=currentPicturePathInHtml, full
             //const fullPath = fspath.join(resolvedPath, sanitizedFilename);
             //console.log("==FullPath:",fullPath)
 
-            replacedHTML = safeReplace(replacedHTML, currentPicturePathInHtml, fullPath);
+            replacedHTML = safeReplace(replacedHTML, currentPicturePathInHtml, fullPicturePath);
 
             //IMPORTANT: Need to create HTML picture obects beforehand
 
