@@ -297,6 +297,9 @@ async function performAtomicWrite(
 ): Promise<FileOperationResult<void>> {
     try {
         const tempPath = `${path}.tmp`;
+        console.log("=== tempPath: ",tempPath)
+        console.log("=== tempPath: ",path)
+        
         await fs.promises.writeFile(tempPath, content, 'utf8');
         
         // Atomic rename operation - /outputpath/file.html.tmp ==> /outputpath/file.html
