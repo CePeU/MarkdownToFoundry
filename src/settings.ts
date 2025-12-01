@@ -651,18 +651,18 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 				htmlPictureRelativePathInput.addText(text => {
 					text.inputEl.style.minWidth = "40ch";
 
-				let remindingRelativePath ="./"
+				let remainingRelativePath ="./"
 				
-				console.log("=== 0) Was here: ",this.activeProfileData.htmlPictureRelativeExportFilePath)
+				//console.log("=== 0) Was here: ",this.activeProfileData.htmlPictureRelativeExportFilePath)
 				if (this.activeProfileData.htmlPictureExportFilePath){ // change to relative file paths if they are set
 					if(this.platform === "win32"){
-						remindingRelativePath="/"+normalizePath(this.activeProfileData.htmlPictureExportFilePath.slice(2));
+						remainingRelativePath="/"+normalizePath(this.activeProfileData.htmlPictureExportFilePath.slice(2));
 					} else {
-						remindingRelativePath="/"+normalizePath(this.activeProfileData.htmlPictureExportFilePath);
+						remainingRelativePath="/"+normalizePath(this.activeProfileData.htmlPictureExportFilePath);
 				}
 				}
 				
-				text.setPlaceholder(`${remindingRelativePath}`);
+				text.setPlaceholder(`${remainingRelativePath}`);
 
 				
 

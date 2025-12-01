@@ -541,7 +541,7 @@ export class Foundry {
 			debug.log("A page update is necessary")
 			this.notePageId = await this.apiPut_CreatePage(Foundry.foundryApiKey, Foundry.clientId, Foundry.foundryRelayServer)
 			updateFrontmatter = false
-			//the assignment should not be necessary as this is an update and the id shoul be existent
+			//the assignment should not be necessary as this is an update and the id should be existent
 			// Update Page
 		}
 
