@@ -1,6 +1,8 @@
-
-[![Latest stable Version](https://img.shields.io/github/v/release/CePeU/MarkdownToFoundry?display_name=tag&sort=semver&label=Latest%20stable%20Version)](https://github.com/CePeU/MarkdownToFoundry/releases/latest)![GitHub all releases](https://img.shields.io/github/downloads/CePeU/MarkdownToFoundry/total)[![License](https://img.shields.io/github/license/CePeU/MarkdownToFoundry)](LICENSE)
-[![Latest pre-release](https://img.shields.io/github/v/release/CePeU/MarkdownToFoundry?include_prereleases&sort=semver&label=Latest%20Prerelease)](https://github.com/CePeU/MarkdownToFoundry/releases)![Info](https://img.shields.io/badge/breaking%20profile%20change-8A2BE2)   
+[![Latest stable Version](https://img.shields.io/github/v/release/CePeU/MarkdownToFoundry?filter=*stable&sort=semver&display_name=tag&label=Latest%20stable%20Version)](https://github.com/CePeU/MarkdownToFoundry/releases/latest)
+![GitHub all releases](https://img.shields.io/github/downloads/CePeU/MarkdownToFoundry/total)
+[![License](https://img.shields.io/github/license/CePeU/MarkdownToFoundry)](LICENSE)
+[![Latest pre-release](https://img.shields.io/github/v/release/CePeU/MarkdownToFoundry?include_prereleases&filter=*-stable!&sort=semver&label=Latest%20Prerelease)](https://github.com/CePeU/MarkdownToFoundry/releases)
+![Info](https://img.shields.io/badge/info-upcoming:%20exportprofiles%20as%20frontmatter-FFE417)  
 
 # Obsidian MarkdownToFoundry Plugin
 Adjusts and exports the natively as HTML rendered Markdown from Obsidian to Foundry VTT.  
@@ -683,6 +685,7 @@ You can also use it to generate a secretID if you need it for any reason.
 ## API Documentation
 
 - Obsidian: [https://github.com/obsidianmd/obsidian-api](https://github.com/obsidianmd/obsidian-api)
+
 
 
 
