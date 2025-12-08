@@ -7,7 +7,7 @@
 # Obsidian MarkdownToFoundry Plugin
 Adjusts and exports the natively as HTML rendered Markdown from Obsidian to Foundry VTT.  
 An [Obsidian](https://obsidian.md) plugin to copy notes as HTML to the clipboard, export as file and/or upload as journal to Foundry VTT. Also allows for relinking of notes.
-![Demolink](https://github.com/CePeU/MarkdownToFoundry/blob/main/docs/UploadDemo.webp))
+![Demolink](https://github.com/CePeU/MarkdownToFoundry/blob/main/docs/UploadDemo.webp)
 
 ## Why Obsidian and not directly in Foundry
 
@@ -685,6 +685,7 @@ You can also use it to generate a secretID if you need it for any reason.
 ## API Documentation
 
 - Obsidian: [https://github.com/obsidianmd/obsidian-api](https://github.com/obsidianmd/obsidian-api)
+
 
 
 
