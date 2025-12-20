@@ -1,11 +1,14 @@
 
-[![Latest stable Version](https://img.shields.io/github/v/release/CePeU/MarkdownToFoundry?display_name=tag&sort=semver&label=Latest%20stable%20Version)](https://github.com/CePeU/MarkdownToFoundry/releases/latest)![GitHub all releases](https://img.shields.io/github/downloads/CePeU/MarkdownToFoundry/total)[![License](https://img.shields.io/github/license/CePeU/MarkdownToFoundry)](LICENSE)
-[![Latest pre-release](https://img.shields.io/github/v/release/CePeU/MarkdownToFoundry?include_prereleases&sort=semver&label=Latest%20Prerelease)](https://github.com/CePeU/MarkdownToFoundry/releases)![Info](https://img.shields.io/badge/breaking%20profile%20change-8A2BE2)   
+[![Latest stable Version](https://img.shields.io/github/v/release/CePeU/MarkdownToFoundry?filter=*stable&sort=semver&display_name=tag&label=Latest%20stable%20Version)](https://github.com/CePeU/MarkdownToFoundry/releases/latest)
+![GitHub all releases](https://img.shields.io/github/downloads/CePeU/MarkdownToFoundry/total)
+[![License](https://img.shields.io/github/license/CePeU/MarkdownToFoundry)](LICENSE)
+[![Latest pre-release](https://img.shields.io/github/v/release/CePeU/MarkdownToFoundry?include_prereleases&filter=*-stable!&sort=semver&label=Latest%20Prerelease)](https://github.com/CePeU/MarkdownToFoundry/releases)    
+![Info](https://img.shields.io/badge/info-upcoming:%20exportprofiles%20as%20frontmatter-FFE417)  
 
 # Obsidian MarkdownToFoundry Plugin
 Adjusts and exports the natively as HTML rendered Markdown from Obsidian to Foundry VTT.  
 An [Obsidian](https://obsidian.md) plugin to copy notes as HTML to the clipboard, export as file and/or upload as journal to Foundry VTT. Also allows for relinking of notes.
-![Demolink](https://private-user-images.githubusercontent.com/115504753/500303991-bcc855db-aa18-42a6-827e-85b9fabc6b84.gif?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjIwMjkzOTAsIm5iZiI6MTc2MjAyOTA5MCwicGF0aCI6Ii8xMTU1MDQ3NTMvNTAwMzAzOTkxLWJjYzg1NWRiLWFhMTgtNDJhNi04MjdlLTg1YjlmYWJjNmI4NC5naWY_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUxMTAxJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MTEwMVQyMDMxMzBaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0yYmM3NmY2OTI1ODcwYjA3ZGE0YjU4MTJhMjBkYWI5MDUyY2IxOWZkZWVlMDQ0ZTI2YjJmNWQ2MTNlZDUyYTk0JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.Bgrwy4KrGxIXs18212f0Z70UjzCPszrcTffv27urWa0)
+![Demolink](https://private-user-images.githubusercontent.com/115504753/500303991-bcc855db-aa18-42a6-827e-85b9fabc6b84.gif?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjQ2MjE0NjEsIm5iZiI6MTc2NDYyMTE2MSwicGF0aCI6Ii8xMTU1MDQ3NTMvNTAwMzAzOTkxLWJjYzg1NWRiLWFhMTgtNDJhNi04MjdlLTg1YjlmYWJjNmI4NC5naWY_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUxMjAxJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MTIwMVQyMDMyNDFaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0xYmYzNTk1NTI0MjRjMzEzZmZiZjY4MDEyOGIxOGZlMWE0YTZlYTM5YjM0NmE2Mjg0MzJmZGIzMmM2MWU2OTgxJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.fWI2YM0OjQNLplFF36OnH0HhErEJPXvVF4AEVm4dVv8)
 
 ## Why Obsidian and not directly in Foundry
 
@@ -90,7 +93,7 @@ I also want to thank the Discord members on the Obsidian plugin-dev channel!
    - allows for export profiles
    - allows for HTML tag replacement
    - allows for HTML modification with regex expressions
-   - allows to save HTML export to files (Windows only so far and not too well tested yet)
+   - allows to save HTML export to files (Linux file export could use more testing)
    - allows to add a footer and header section for the exported HTML (so you can add a body tag and "style.css" for the file export)
    - allows to add your own JavaScript code (macro) to manipulate and adjust the HTML
    - allows to upload as journal to Foundry VTT
@@ -101,9 +104,10 @@ I also want to thank the Discord members on the Obsidian plugin-dev channel!
    - (planned: make it macOS compatible? and look into how to make it usable on Android)
 
 > [!NOTE]  
-> At this time it is a stable very first release. It evolves rapidly but I had not yet time to check all of its functionality on Linux or even MacOS.
+> At this time this are stable very first releases. It evolves rapidly but I had not yet time to check all of its functionality on Linux or even MacOS.
 > A lot of functionality currently expects CORRECT inputs - READ the settings section!
 > The code needs more testing, more defaulting, more error handling and catching and probably less expectation from me to be a perfect piece of software.
+> The code also needs some serious cleaning up.
 
 ## Tested on
 
@@ -177,7 +181,7 @@ Up to this point a HTML node view was manipulated! After these steps an HTML str
      [ThreeHats/foundryvtt-rest-api-relay](https://github.com/ThreeHats/foundryvtt-rest-api-relay) or use [https://foundryvtt-rest-api-relay.fly.dev](https://foundryvtt-rest-api-relay.fly.dev)        
      
  C)  You need to install the Foundry REST module.       
-     (ThreeHats/foundryvtt-rest-api: A Foundry VTT module that provides a general purpose REST API through a WebSocket relay](https://github.com/ThreeHats/foundryvtt-rest-api)       
+     (ThreeHats/foundryvtt-rest-api: A Foundry VTT module that provides a general purpose REST API through a WebSocket relay (https://github.com/ThreeHats/foundryvtt-rest-api)       
 
 >[!IMPORTANT]
 > For first steps and probably most reliable functionality you should be logged in as a user into your foundry instance.
@@ -200,7 +204,7 @@ Major changes which probably WILL break your setup or give major improvements ar
 
   Debug output can be seen if you press ctrl+shift+i in your Browser. Then select "Console" in the menu.
   On the right side beside "Filter" select "All levels" and enable "Verbose". This will show all console.debug output messages.
-  MarkdownToFoundry messages begin with "M2F ... some .. text"
+  MarkdownToFoundry messages begin with "M2F: ... some .. text"
 
 ## Profile Management
 
@@ -223,7 +227,7 @@ for HTML export.
 
 You can add new profiles or remove profiles here. To remove a profile just use the X on the profile tag.
 A default profile and a Foundry export profile which will export a callout with the "secret" metadata as a   
-secret into Foundry VTT are inlcuded.
+secret into Foundry VTT are included.
 
 ### Clone Profile
 - **Description**: Create a new profile by cloning the settings of the current profile.
@@ -336,7 +340,7 @@ is set. The plugin uses query selector syntax.
 
 #### Example:
 An Obsidian callout of this type ">[!secret]+ Some Secret GM Stuff" needs to be made into a secret in Foundry VTT.   
-The dirty HTML ouput is somethink like this:   
+The dirty HTML ouput is something like this:   
 `<div ... data-callout="secret"...> ... </div>`   
 For Foundry VTT we need a "section" tag instead of a div tag. So we change the tag.  
 
@@ -408,7 +412,7 @@ return newHtml
 This will replace all classes="secret" texts with classes="secret" id="xxxxxxxxx" and generate the desired HTML:   
 `<section  class="secret" id="xxxxxxxxxx"><summary> Some secret GM stuff</summar></section>`  
 
-If you want you can improve by also cleaning out the summary tags during as a second and third step.
+If you want you can improve by also cleaning out the summary tags during a second and third step.
 ***
 
 ## Detailed Export Rules

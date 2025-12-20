@@ -1,9 +1,17 @@
 # Changelog
 
+## [1.2.3] / 2025-11-17
+
+### Fixed
+- removed data.json as it will be generated on first run anyway
+- adjusted workflow
+- removed typos in Changelog and Readme
+
+
 ## [1.2.2] / 2025-11-17
 
 ### Fixed
-- On first export the picture path was not initialiazed correctly for the picture collection (as no foundry object was initialiazed yet)
+- On first export the picture path was not initialized correctly for the picture collection (as no foundry object was initialized yet)
 
 
 ### Added
