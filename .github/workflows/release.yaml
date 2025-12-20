@@ -45,4 +45,4 @@ jobs:
           gh release create "$tag" \
             --title="Release $tag" \
             --draft \
-            main.js manifest.json styles.css ./src/data.json markdowntofoundry.zip
+            main.js manifest.json styles.css markdowntofoundry.zip
