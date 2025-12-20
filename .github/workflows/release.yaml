@@ -31,7 +31,7 @@ jobs:
       - name: Zip output
         run: |
           mkdir markdowntofoundry
-          cp main.js manifest.json styles.css ./src/data.json ./markdowntofoundry/
+          cp main.js manifest.json styles.css ./markdowntofoundry/
           zip -r markdowntofoundry.zip markdowntofoundry
 
       - name: Create release
