@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.2.3] / 2025-11-17
+## [1.2.3] / 2025-12-20
 
 ### Fixed
 - removed data.json as it will be generated on first run anyway
