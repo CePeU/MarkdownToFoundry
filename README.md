@@ -1,14 +1,13 @@
-
 [![Latest stable Version](https://img.shields.io/github/v/release/CePeU/MarkdownToFoundry?filter=*stable&sort=semver&display_name=tag&label=Latest%20stable%20Version)](https://github.com/CePeU/MarkdownToFoundry/releases/latest)
 ![GitHub all releases](https://img.shields.io/github/downloads/CePeU/MarkdownToFoundry/total)
 [![License](https://img.shields.io/github/license/CePeU/MarkdownToFoundry)](LICENSE)
-[![Latest pre-release](https://img.shields.io/github/v/release/CePeU/MarkdownToFoundry?include_prereleases&filter=*-stable!&sort=semver&label=Latest%20Prerelease)](https://github.com/CePeU/MarkdownToFoundry/releases)    
+[![Latest pre-release](https://img.shields.io/github/v/release/CePeU/MarkdownToFoundry?include_prereleases&filter=*-stable!&sort=semver&label=Latest%20Prerelease)](https://github.com/CePeU/MarkdownToFoundry/releases)
 ![Info](https://img.shields.io/badge/info-upcoming:%20exportprofiles%20as%20frontmatter-FFE417)  
 
 # Obsidian MarkdownToFoundry Plugin
 Adjusts and exports the natively as HTML rendered Markdown from Obsidian to Foundry VTT.  
 An [Obsidian](https://obsidian.md) plugin to copy notes as HTML to the clipboard, export as file and/or upload as journal to Foundry VTT. Also allows for relinking of notes.
-![Demolink](https://private-user-images.githubusercontent.com/115504753/500303991-bcc855db-aa18-42a6-827e-85b9fabc6b84.gif?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjQ2MjE0NjEsIm5iZiI6MTc2NDYyMTE2MSwicGF0aCI6Ii8xMTU1MDQ3NTMvNTAwMzAzOTkxLWJjYzg1NWRiLWFhMTgtNDJhNi04MjdlLTg1YjlmYWJjNmI4NC5naWY_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUxMjAxJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MTIwMVQyMDMyNDFaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0xYmYzNTk1NTI0MjRjMzEzZmZiZjY4MDEyOGIxOGZlMWE0YTZlYTM5YjM0NmE2Mjg0MzJmZGIzMmM2MWU2OTgxJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.fWI2YM0OjQNLplFF36OnH0HhErEJPXvVF4AEVm4dVv8)
+![Demolink](https://github.com/CePeU/MarkdownToFoundry/blob/main/docs/UploadDemo.webp)
 
 ## Why Obsidian and not directly in Foundry
 
@@ -687,6 +686,10 @@ You can also use it to generate a secretID if you need it for any reason.
 ## API Documentation
 
 - Obsidian: [https://github.com/obsidianmd/obsidian-api](https://github.com/obsidianmd/obsidian-api)
+
+
+
+
 
 
 
