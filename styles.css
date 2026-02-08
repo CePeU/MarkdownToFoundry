@@ -25,3 +25,95 @@
   display: flex;
   justify-content: right;
 }
+
+/*css for m2f modal*/
+.m2f-modal {
+width: fit-content; 
+}
+
+/*.m2f-modal-container{
+}*/
+
+.m2f-modal-two-column-rows-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 60%;      /* Modal scrollbar */
+  max-width: fit-content; 
+  overflow-y: auto;
+}
+
+.m2f-modal-column-row {
+  display: flex;
+  flex-direction: row;
+  /*display: grid;
+  grid-template-columns: 1fr 6fr 6fr 2fr;*/
+  max-width: fit-content; 
+  align-items: center;
+  gap: 4px;
+}
+
+/* Target the button bar container */
+.m2f-modal-bar-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  align-items: center;
+}
+
+/* Target all setting items within the button bar */
+.m2f-modal-bar-buttons .setting-item {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  border: none;
+  flex: 0 0 auto;
+}
+
+/* Target the control (button container) */
+.m2f-modal-bar-buttons .setting-item-control {
+  margin: 0;
+  padding: 0;
+}
+
+/* Target the info element (setting item container)*/
+.m2f-modal-bar-buttons .setting-item-info {
+  margin: 0;
+  padding: 0;
+}
+
+/* Optional: Style the buttons themselves */
+/*.m2f-modal-bar-buttons button {
+  padding: 0.25rem 0.5rem;
+  min-width: 32px;
+  height: 24px;
+  
+}*/
+
+
+.m2f-modal-row-drag-handle {
+  cursor: grab;
+  user-select: none;
+  padding: 0 4px;
+}
+
+.m2f-modal-column-input {
+  width: 40ch;
+  /*grid-column: 2;*/
+  /*flex: 1 1 0;*/
+}
+
+
+
+.m2f-modal-add-row-global {
+  margin-top: 6px;
+  align-self: flex-start;
+}
+
+.m2f-modal-column-row.dragging {
+  opacity: 0.5;
+}
+
+.m2f-modal-column-row.drag-over {
+  outline: 1px dashed var(--text-muted);
+}

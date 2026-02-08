@@ -1687,7 +1687,7 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 	/**
 	 * save current settings
 	 */
-	private save = debounce(
+	public save = debounce(
 		async () => {
 			await this.plugin.saveData(this._allProfileData);
 		},

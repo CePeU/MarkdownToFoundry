@@ -1,6 +1,3 @@
-import { cleanHtml, replacePictureLinks,replaceHrefPaths } from "./html-cleaner";
-import { Foundry, FoundryHtml, generateIdForFile } from "./foundry";
-import {VERSION_CONSTANTS } from "./versionConstant";
 import {
 	addIcon,
 	debounce,
@@ -15,6 +12,13 @@ import {
 	normalizePath,
 	FileSystemAdapter,
 } from "obsidian";
+
+import {App} from "obsidian";
+import { TwoColumnListModal, RowArray } from "./modals";
+
+import { cleanHtml, replacePictureLinks,replaceHrefPaths } from "./html-cleaner";
+import { Foundry, FoundryHtml, generateIdForFile } from "./foundry";
+import {VERSION_CONSTANTS } from "./versionConstant";
 import { showBrowserNotification, ObsidianPicture,debug,createRelativePath, buildPictureUploadList } from "./utils";
 import { writeToFilesystem, writeToFilesystem_Pictures } from "./utils-file"
 import { MarkdownToFoundrySettings, MarkdownToFoundrySettingsTab as MarkdownToFoundrySettingsTab } from "./settings";
@@ -52,6 +56,46 @@ export default class MarkdownToFoundry extends Plugin {
 		// add custom icon
 		this.platform = process.platform ?? "";
 
+		this.addCommand({
+      id: "open-two-column-list-modal",
+      name: "Open two-column list modal",
+      callback: () => {
+        this.openTwoColumnModal();
+      }
+    });
+
+this.registerMarkdownPostProcessor((el, ctx) => {
+            // Alle Callouts vom Typ "foundry-secret" finden
+            const secretCallouts = el.querySelectorAll<HTMLDivElement>('.callout[data-callout="foundry-secret"]');
+console.log("Secret main container: ",secretCallouts)
+
+            secretCallouts.forEach(callout => {
+                // In Obsidian ist der Inhalt typischerweise in .callout-content
+                const contentEl = callout.querySelector(".callout-content") as HTMLElement | null;
+				console.log("Content Element: ",contentEl)
+				const contentElTitle = callout.querySelector(".callout-title") as HTMLElement | null;
+				console.log("Content Element Title: ",contentElTitle)
+                // Fallback: Wenn keine spezielle Content-Region gefunden wird, nimm den gesamten Callout-Inhalt
+                const contentHTML = contentEl ? contentEl.innerHTML : callout.innerHTML;
+
+                // Zufällige ID erzeugen (z. B. "secret-<timestamp>-<random>")
+                const randomId = `secret-${Foundry.generateFoundryID(this.app)}`;
+
+                // Neues <section>-Element erstellen
+                const section = document.createElement("section");
+                section.classList.add("M2F");
+				section.classList.add("secret");
+                section.id = randomId;
+
+                // Inhalt des Callouts in das section-Element übernehmen
+                // (nur der Text/Content, ohne Callout-Rahmen)
+                section.innerHTML = contentHTML;
+
+                // Callout im DOM durch das neue <section>-Element ersetzen
+                callout.parentElement?.replaceChild(section, callout);
+            });
+        });
+
 		addIcon(
 			"markdownToFoundry-icon", MARKDOWN_TO_FOUNDRY_ICON
 		);
@@ -67,37 +111,23 @@ export default class MarkdownToFoundry extends Plugin {
 		const rotateDiv = createDiv({ parent: this.copyInProgressModal.contentEl, cls: "mdToFoundry-rotate" }); // create a div with the modal content
 		setIcon(rotateDiv, "loader");
 
-		const copyCallback = async () => {
-			
-			debug.log("Started with the copy and render process of the HTML");
-			
-			//Important!
-			//await forceRerender(this.app,this)
-			const view = this.app.workspace.getActiveViewOfType(MarkdownView); // get the active view of the workspace, which is a markdown view
-			if (view != null) {
-				// if the view is not null, we have an active markdown view
-				if (view.editor != null) {
-					// if the editor is not null, we have an active markdown editor
-					this.startCopyProcess(settingsTab.activeProfileData); // start the copy process by creating a new div to store the rendered HTML
-					this.renderHtml(view.editor); // render the HTML from the editor content
-				} else {
-					this.copyResult = view.contentEl; // if the editor is null, we have a markdown view without an editor, so we use the content element of the view
-					if (this.hasCopyResult()) {
-						// if we have a copy result, we can copy the HTML to the clipboard
-						this.startCopyProcess(settingsTab.activeProfileData); // start the copy process by creating a new div to store the rendered HTML
-						this.exportHtml(settingsTab.activeProfileData); // copy the HTML to the clipboard //settingsTab.settings SETTINGS
-					}
-				}
-			}
-		};
-
-
-		// add the ribon icon
+		
+		const copyCallbackRibbon = this.copyCallbackModified(settingsTab);
+		const copyCallbackSubmenu = this.copyCallbackPlain(settingsTab);
+		// add the ribbon icon
 		this.addRibbonIcon(			
 			"markdownToFoundry-icon",
 			"Copy editor selection or full note as HTML or upload to Foundry",
-			() => copyCallback()
+			() => copyCallbackRibbon()
 		);
+
+		// Add import profile command
+        this.addCommand({
+            id: "import-profile-json",
+            name: "Import profile from JSON file",
+            callback: () => this.importProfileFromJSON(settingsTab),
+        });
+
 
 		// Generate a command which can be called by templater to insert a foundry ID which will be unique from all used ID
 		this.addCommand({
@@ -124,9 +154,9 @@ export default class MarkdownToFoundry extends Plugin {
 			id: "clipboard",
 			icon: "markdownToFoundry-icon",
 			name: "Copy editor selection or full note as HTML or upload to Foundry",
-			callback: copyCallback,
+			callback: copyCallbackRibbon,
 		});
-
+		
 		//Add a menu entry in the pop up file menu and get the selected file or files of the selected directory and subdirectories
 		/*TODO: implement if batch is possible - DISABLED FOR NOW: 
 		this.registerEvent(
@@ -165,7 +195,7 @@ export default class MarkdownToFoundry extends Plugin {
 							profileItem.setTitle(profileName);
 							profileItem.onClick(() => {
 								settingsTab.activateProfile = profileName;
-								copyCallback();
+								copyCallbackSubmenu();
 							});
 						});
 					}
@@ -179,9 +209,11 @@ export default class MarkdownToFoundry extends Plugin {
 			// We can't unregister the post processor, and all postprocessors are called every time a render is triggered.
 			// To test if the render was triggered by our copy process, we check if our copy process is in progress.
 			//cepeu: By calling MarkdownRenderer.render in the renderHtml method, we trigger the post processor method to be called.
+			//cepeu: The post processor is called during the markdown rendering when a code block is processed by a registered post processor
 			//cepeu: I assume that for every section of the markdown this post processor method is called. The post processor now can
 			//cepeu: modify the render result by querying the el => html node element.
 			//cepeu: the post processors are finished if this.copyResult has a value different from undefined
+			//cepeu: this.copyResult is set at the end of the (whole) Markdown render process
 			//cepeu: this.hasCopyReseult holds the rendered HTML in the copyResult property
 			//cepeu: sadly dataview is not rendering the markdown content in the post processor, at this point yet but it seems to take place later
 			//cepeu: in the view mode of the editor
@@ -308,7 +340,7 @@ component	Component	The parent component to manage the lifecycle of the rendered
 
 						//TODO: a loop to work trough all batch files (an array of files) and build the picture list
 						//TODO: Make this generic so a picture list is also build for file export, also generate a copy of the original to consume later on
-						//TODO: Analyse if you need two picture lists, one for link replacement and a global one for uploading files which is reduced by uploaded pictures
+						//TODO: Analyse if you need two picture lists, one for link replacement and a global one for uploading files which is reduced to uploaded pictures
 						// probably a "set" is the way to go for the pure upload but array information needs to be probably reduced for that 
 
 						//TOOD: Put this into the init function of the Foundry class 
@@ -590,6 +622,206 @@ component	Component	The parent component to manage the lifecycle of the rendered
 	private hasCopyResult() {
 		return this.copyResult !== undefined;
 	}
+
+	/** Reads the VTTprofile from frontmatter and sets it as active profile if it exists */
+    private async getProfileFromFrontmatter(file: TFile): Promise<string | null> {
+        try {
+            let profileName: string | null = null;
+            await this.app.fileManager.processFrontMatter(file, frontmatter => {
+                profileName = frontmatter["VTTprofile"] ?? null;
+            });
+            return profileName;
+        } catch (error) {
+            debug.log("Error reading VTTprofile from frontmatter:", error);
+            return null;
+        }
+    }
+
+	private copyCallbackPlain(settingsTab: MarkdownToFoundrySettingsTab) {
+			return async () => {
+			debug.log("Started with the copy and render process of the HTML");
+			
+			//Important!
+			//await forceRerender(this.app,this)
+			const view = this.app.workspace.getActiveViewOfType(MarkdownView); // get the active view of the workspace, which is a markdown view
+			if (view != null) {
+				// if the view is not null, we have an active markdown view
+				if (view.editor != null) {
+					// if the editor is not null, we have an active markdown editor
+					this.startCopyProcess(settingsTab.activeProfileData); // start the copy process by creating a new div to store the rendered HTML
+					this.renderHtml(view.editor); // render the HTML from the editor content
+				} else {
+					this.copyResult = view.contentEl; // if the editor is null, we have a markdown view without an editor, so we use the content element of the view
+					if (this.hasCopyResult()) {
+						// if we have a copy result, we can copy the HTML to the clipboard
+						this.startCopyProcess(settingsTab.activeProfileData); // start the copy process by creating a new div to store the rendered HTML
+						this.exportHtml(settingsTab.activeProfileData); // copy the HTML to the clipboard //settingsTab.settings SETTINGS
+					}
+				}
+			}
+			}
+		};
+
+    /** Modified copy callback that checks for frontmatter profile */
+    private copyCallbackModified(settingsTab: MarkdownToFoundrySettingsTab) {
+        return async () => {
+            debug.log("Started with the copy and render process of the HTML");
+            
+            const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+            if (view != null) {
+                if (view.editor != null) {
+                    this.activeFile = this.app.workspace.activeEditor?.file || this.activeFile;
+                    
+                    // Check for VTTprofile in frontmatter
+                    const frontmatterProfile = await this.getProfileFromFrontmatter(this.activeFile);
+                    if (frontmatterProfile && Object.keys(settingsTab.allProfileData).includes(frontmatterProfile)) {
+                        settingsTab.activateProfile = frontmatterProfile;
+                        debug.log(`Activated profile from frontmatter: ${frontmatterProfile}`);
+                    }
+                    
+                    this.startCopyProcess(settingsTab.activeProfileData);
+                    this.renderHtml(view.editor);
+                } else {
+                    this.copyResult = view.contentEl;
+                    if (this.hasCopyResult()) {
+                        // Check for VTTprofile in frontmatter
+                        const frontmatterProfile = await this.getProfileFromFrontmatter(this.activeFile);
+                        if (frontmatterProfile && Object.keys(settingsTab.allProfileData).includes(frontmatterProfile)) {
+                            settingsTab.activateProfile = frontmatterProfile;
+                            debug.log(`Activated profile from frontmatter: ${frontmatterProfile}`);
+                        }
+                        
+                        this.startCopyProcess(settingsTab.activeProfileData);
+                        this.exportHtml(settingsTab.activeProfileData);
+                    }
+                }
+            }
+        };
+    }
+
+	/** Imports profile data from a JSON file and merges it with the current active profile */
+    private async importProfileFromJSON(settingsTab: MarkdownToFoundrySettingsTab): Promise<void> {
+        try {
+            // Open file picker dialog
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = async (event: Event) => {
+                const target = event.target as HTMLInputElement;
+                const file = target.files?.[0];
+                
+                if (!file) {
+                    debug.log("No file selected");
+                    return;
+                }
+
+                try {
+                    const fileContent = await file.text();
+                    const importedData = JSON.parse(fileContent);
+                    
+                    debug.log("Imported JSON data:", importedData);
+                    
+                    // Get current active profile settings
+                    //const settingsTab = this.app.plugins.plugins['markdown-to-foundry']?.settingsTab as MarkdownToFoundrySettingsTab;
+                    if (!settingsTab) {
+                        new Notice("Error: Could not access settings", 3500);
+                        return;
+                    }
+
+                    const currentProfile = settingsTab.activeProfileData;
+                    const mergedProfile: MarkdownToFoundrySettings = { ...currentProfile };
+
+                    // Recursively merge imported data with current profile
+                    this.mergeProfileData(mergedProfile, importedData);
+
+                    debug.log("Merged profile data:", mergedProfile);
+
+                    // Save merged profile as current active profile
+                    settingsTab.allProfileData[settingsTab.activateProfile] = mergedProfile;
+					//this._allProfileData
+                    await settingsTab.save(); // write save
+
+                    new Notice(`Profile "${settingsTab.activateProfile}" updated with imported data`, 3500);
+                    debug.log(`Profile "${settingsTab.activateProfile}" successfully updated`);
+
+                } catch (error) {
+                    let message = "Unknown error";
+                    if (error instanceof Error) {
+                        message = error.message;
+                    } else {
+                        message = String(error);
+                    }
+                    new Notice(`Error parsing JSON file: ${message}`, 5000);
+                    debug.log("Error parsing JSON:", error);
+                }
+            };
+
+            input.click();
+
+        } catch (error) {
+            let message = "Unknown error";
+            if (error instanceof Error) {
+                message = error.message;
+            } else {
+                message = String(error);
+            }
+            new Notice(`Error opening file dialog: ${message}`, 5000);
+            debug.log("Error opening file picker:", error);
+        }
+    }
+
+    /** Recursively merges imported profile data with existing profile, matching properties */
+    private mergeProfileData(target: any, source: any): void {
+        for (const key in source) {
+            if (Object.prototype.hasOwnProperty.call(source, key)) {
+                if (key in target) {
+                    // Property exists in target profile
+                    const sourceValue = source[key];
+                    const targetValue = target[key];
+
+                    // If both are objects (but not arrays), recursively merge
+                    if (
+                        sourceValue !== null &&
+                        targetValue !== null &&
+                        typeof sourceValue === 'object' &&
+                        typeof targetValue === 'object' &&
+                        !Array.isArray(sourceValue) &&
+                        !Array.isArray(targetValue)
+                    ) {
+                        this.mergeProfileData(targetValue, sourceValue);
+                    } else {
+                        // For primitives and arrays, directly assign the imported value
+                        target[key] = sourceValue;
+                        debug.log(`Merged property: ${key} = ${sourceValue}`);
+                    }
+                } else {
+                    debug.log(`Skipped property "${key}" - not found in current profile`);
+                }
+            }
+        }
+    }
+
+	
+
+  private openTwoColumnModal() {
+    const initial: RowArray = [
+      ["A1", "B1"],
+      ["A2", "B2"]
+    ];
+
+    new TwoColumnListModal(this.app, initial, (result) => {
+      if (!result) {
+        new Notice("Modal cancelled");
+        return;
+      }
+
+      // result ist RowArray = [ [string,string], [string,string], ... ]
+      console.log("Rows from modal:", result);
+      new Notice(`Received ${result.length} rows from modal`);
+    }).open();
+  }
+
 
 	onunload() { }
 }
