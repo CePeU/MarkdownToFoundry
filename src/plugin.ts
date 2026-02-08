@@ -14,7 +14,7 @@ import {
 } from "obsidian";
 
 import {App} from "obsidian";
-import { TwoColumnListModal, RowArray } from "./modals";
+import { MultiColumnListModal, RowArray } from "./modals";
 
 import { cleanHtml, replacePictureLinks,replaceHrefPaths } from "./html-cleaner";
 import { Foundry, FoundryHtml, generateIdForFile } from "./foundry";
@@ -810,7 +810,7 @@ component	Component	The parent component to manage the lifecycle of the rendered
       ["A2", "B2"]
     ];
 
-    new TwoColumnListModal(this.app, initial, (result) => {
+    new MultiColumnListModal(this.app, ["Regeln","Explanation Text"],initial, (result) => {
       if (!result) {
         new Notice("Modal cancelled");
         return;

@@ -10,6 +10,7 @@ import {
 	addIcon,
 	normalizePath,
 } from "obsidian";
+import { FoundrySelectIdModal,jsCodeModal,FooterHeaderModal, MultiColumnListModal, RowArray } from "./modals";
 import MarkdownToFoundry from "./plugin";
 import { isEmpty,debug } from "./utils";
 import { Foundry, apiPost_CreateFoundryMacro,LINK_UPDATE_CODE } from "./foundry"; //,LINK_UPDATE_CODE 
@@ -807,17 +808,23 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 						.setIcon("code-xml")
 						.setTooltip("Add tag replacement rules")
 						.onClick(() => {
-							const arrayForModal: string[][] = this.activeProfileData.rulesForTags;
+							const arrayForModal: RowArray = this.activeProfileData.rulesForTags;
 							// Create modal object
-							const modal = new RuleEditorModal(
+							const modal = new MultiColumnListModal(
+							//const modal = new RuleEditorModal(
 								this.app,
+								["Replacement rules","The first column holds the rule how to find the DOM element (div or div.classname/div[attributeName] - use query selector syntax). The second column holds the new element name (for example 'span' or 'p')."],
 								arrayForModal,
 								updatedRulesArray => {
+									// Only update if result is not null
+									if (updatedRulesArray !== null) {
 									this.activeProfileData.rulesForTags = updatedRulesArray;
 									this.save();
 									this.display();
+									}
 								},
-								"The first column holds the rule how to find the DOM element (div or div.classname/div[attributeName] - use query selector syntax). The second column holds the new element name (for example 'span' or 'p')."
+								["Query selector","New element name"]
+								//"The first column holds the rule how to find the DOM element (div or div.classname/div[attributeName] - use query selector syntax). The second column holds the new element name (for example 'span' or 'p')."
 							);
 							modal.open();
 						})
@@ -832,20 +839,24 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 						.setIcon("regex")
 						.setTooltip("Add regex rules")
 						.onClick(() => {
-							let arrayForModal: string[][] = this.activeProfileData.rulesForRegex;
+							let arrayForModal: RowArray = this.activeProfileData.rulesForRegex;
 							if (arrayForModal === undefined) {
 								arrayForModal = this._activeProfileData.rulesForRegex;
 							}
 							// Create new modal
-							const modal = new RuleEditorModal(
+							const modal = new MultiColumnListModal(
 								this.app,
+								["Regex rules","The first column is your regex expression. You need to enter it with global flags like /gm (so 'regexPattern/gm'). The second column holds the replacement string."],
 								arrayForModal,
 								updatedRulesArray => {
+									if (updatedRulesArray !== null) {
 									this.activeProfileData.rulesForRegex = updatedRulesArray;
 									this.save();
 									this.display();
+									}
 								},
-								"The first column is your regex expression. You need to enter it with global flags like /gm (so 'regexPattern/gm'). The second column holds the replacement string.",
+								["Regex expression","Replacement string"]
+								//"The first column is your regex expression. You need to enter it with global flags like /gm (so 'regexPattern/gm'). The second column holds the replacement string.",
 								//TODO: for now disabled ["Inner and Outer", "InnerHTML", "OuterHTML"] // Dropdown values for the second column
 							);
 							modal.open();
@@ -1696,6 +1707,7 @@ export class MarkdownToFoundrySettingsTab extends PluginSettingTab {
 	);
 }
 
+/*
 //Rules Modal - Modal for editing the rules
 export class RuleEditorModal extends Modal {
 	private _rulesData: string[][];
@@ -1941,6 +1953,7 @@ export class jsCodeModal extends Modal {
 	}
 }
 
+
 export class FooterHeaderModal extends Modal {
 	private _header: string = "";
 	private _footer: string = "";
@@ -2083,3 +2096,4 @@ export class FoundrySelectIdModal extends Modal {
 		contentEl.empty();
 	}
 }
+	*/

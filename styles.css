@@ -28,15 +28,20 @@
 
 /*css for m2f modal*/
 .m2f-modal {
-width: fit-content; 
+width: 80vw; 
 }
 
+.m2f-modal-explanation {
+/*max-width: 80%;*/
+padding: 0.5rem 0;
+}
 /*.m2f-modal-container{
 }*/
 
 .m2f-modal-two-column-rows-container {
-  display: flex;
-  flex-direction: column;
+  /*display: flex;
+  flex-direction: column;*/
+  width: 100%;
   gap: 4px;
   max-height: 60%;      /* Modal scrollbar */
   max-width: fit-content; 
@@ -97,13 +102,6 @@ width: fit-content;
   padding: 0 4px;
 }
 
-.m2f-modal-column-input {
-  width: 40ch;
-  /*grid-column: 2;*/
-  /*flex: 1 1 0;*/
-}
-
-
 
 .m2f-modal-add-row-global {
   margin-top: 6px;
@@ -116,4 +114,25 @@ width: fit-content;
 
 .m2f-modal-column-row.drag-over {
   outline: 1px dashed var(--text-muted);
+}
+
+.m2f-modal-column-row {
+  /*--m2f-modal-inputbox-size: 40ch;*/
+    display: grid;
+    grid-template-columns: var(--m2f-grid-columns, 12px  var(--m2f-modal-inputbox-size,20rem)  var(--m2f-modal-inputbox-size,20rem) auto);
+    align-items: center;
+    gap: 4px;
+}
+
+.m2f-modal-header-row{
+  /*display: grid;
+  grid-template-columns: var(--m2f-grid-columns, 12px  var(--m2f-modal-inputbox-size,20rem)  var(--m2f-modal-inputbox-size,20rem) auto);
+  align-items: center;
+  gap: 4px;*/
+  font-weight: bold;
+  background-color: var(--background-secondary);
+  border-bottom: 2px solid var(--text-muted);
+  border-top: 2px solid var(--text-muted);
+  margin-bottom: 0.5rem;
+  min-width: 100%;
 }
